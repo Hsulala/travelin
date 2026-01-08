@@ -1,0 +1,1537 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>SNOOPY TRIP</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#fcd34d">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    
+    <!-- SortableJS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
+    
+    <style>
+        /* 引入圓潤可愛的字體 */
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;600;700&display=swap');
+
+        :root {
+            --snoopy-yellow: #fcd34d; /* Woodstock */
+            --snoopy-red: #ef4444;    /* Dog house */
+            --snoopy-black: #1c1917;  /* Lines */
+            --snoopy-white: #ffffff;
+            --snoopy-blue: #60a5fa;   /* Sky */
+        }
+
+        body { 
+            font-family: 'Fredoka', sans-serif;
+            background-color: var(--snoopy-yellow); 
+            /* 漫畫風格的點點背景 */
+            background-image: radial-gradient(var(--snoopy-white) 15%, transparent 16%), radial-gradient(var(--snoopy-white) 15%, transparent 16%);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+            color: var(--snoopy-black);
+            padding-bottom: env(safe-area-inset-bottom);
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        .app-container { max-width: 500px; margin: 0 auto; min-height: 100vh; position: relative; background-color: transparent; padding-bottom: 80px; }
+        ::-webkit-scrollbar { display: none; }
+
+        .home-safe-padding { padding-top: calc(env(safe-area-inset-top) + 20px); }
+
+        .sticky-header-safe {
+            position: sticky; top: 0; z-index: 40; 
+            background-color: var(--snoopy-yellow);
+            border-bottom: 4px solid var(--snoopy-black);
+            padding-top: calc(env(safe-area-inset-top) + 10px);
+            padding-bottom: 10px; padding-left: 1rem; padding-right: 1rem;
+            margin-left: -1rem; margin-right: -1rem;
+            box-shadow: 0 4px 0px rgba(0,0,0,0.1); 
+        }
+
+        /* Snoopy Comic Card Style */
+        .card-comic { 
+            background-color: #ffffff; 
+            border: 3px solid var(--snoopy-black); 
+            border-radius: 24px; 
+            box-shadow: 5px 5px 0px var(--snoopy-black); 
+            transition: transform 0.1s, box-shadow 0.1s; 
+            overflow: hidden;
+            position: relative;
+        }
+        .card-comic:active { transform: translate(3px, 3px); box-shadow: 2px 2px 0px var(--snoopy-black); }
+        
+        .menu-icon { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.2rem; height: 140px; position: relative; }
+        .menu-icon i { width: 32px; height: 32px; margin-bottom: 8px; color: var(--snoopy-black); stroke-width: 2.5px; }
+        .menu-icon span { font-weight: 700; text-transform: uppercase; font-size: 1.2rem; letter-spacing: 0.5px; line-height: 1; text-align: center; }
+        .menu-icon .subtitle { font-size: 0.8rem; font-weight: 600; color: #57534e; margin-top: 4px; }
+
+        .hidden-view { display: none; }
+        .active-view { display: block; animation: slideIn 0.2s ease-out; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: 0; } }
+
+        /* Timeline Styles updated for Comic look */
+        .timeline-item { position: relative; }
+        .timeline-line { position: absolute; left: 19px; top: 24px; bottom: -10px; width: 4px; background: var(--snoopy-black); z-index: 0; border-radius: 2px;}
+        .timeline-dot { position: absolute; left: 10px; top: 24px; width: 22px; height: 22px; background: var(--snoopy-white); border: 4px solid var(--snoopy-black); border-radius: 50%; z-index: 10; }
+        .timeline-content-wrapper { padding-left: 50px; position: relative; }
+        
+        .sortable-ghost { opacity: 0.4; background: #fef3c7; border: 3px dashed var(--snoopy-black); }
+        .sortable-drag { opacity: 1; transform: scale(1.02) rotate(2deg); z-index: 50; box-shadow: 10px 10px 0px rgba(0,0,0,0.2); }
+        .drag-handle { touch-action: none; cursor: grab; padding: 8px; color: #d6d3d1; }
+        
+        .big-action-btn { 
+            pointer-events: auto; cursor: pointer; width: 100%; padding: 16px; border-radius: 50px; 
+            font-weight: 700; font-size: 18px; border: 3px solid var(--snoopy-black); 
+            display: flex; justify-content: center; align-items: center; gap: 8px; 
+            box-shadow: 4px 4px 0px var(--snoopy-black); 
+            transition: transform 0.1s; background: var(--snoopy-black); color: white; 
+        }
+        .big-action-btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0px var(--snoopy-black); }
+        .btn-yellow { background: var(--snoopy-yellow); color: var(--snoopy-black); }
+        .btn-red { background: var(--snoopy-red); color: white; }
+        .btn-blue { background: var(--snoopy-blue); color: white; }
+
+        .header-bar { display: flex; justify-content: space-between; align-items: center; } 
+        .back-btn { width: 44px; height: 44px; border: 3px solid var(--snoopy-black); background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 3px 3px 0px var(--snoopy-black); transition: all 0.1s; }
+        .back-btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0px var(--snoopy-black); }
+        
+        .date-tab { flex-shrink: 0; width: 64px; height: 70px; border: 3px solid var(--snoopy-black); background: white; color: var(--snoopy-black); display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 700; cursor: pointer; transition: all 0.2s; box-shadow: 3px 3px 0px rgba(0,0,0,0.2); border-radius: 16px; }
+        .date-tab.active { background: var(--snoopy-black); color: var(--snoopy-yellow); box-shadow: 3px 3px 0px var(--snoopy-white); transform: translate(-2px, -2px) rotate(-3deg); border-color: var(--snoopy-black); }
+        
+        .checkbox-custom { appearance: none; width: 28px; height: 28px; border: 3px solid var(--snoopy-black); background: white; display: grid; place-content: center; cursor: pointer; flex-shrink: 0; border-radius: 8px; }
+        .checkbox-custom::before { content: ""; width: 14px; height: 14px; transform: scale(0); transition: 0.1s transform ease-in-out; background: var(--snoopy-black); border-radius: 4px; }
+        .checkbox-custom:checked::before { transform: scale(1); }
+        .checkbox-custom:checked { background: var(--snoopy-yellow); }
+
+        .item-checked { opacity: 0.6; order: 999; }
+        .item-checked span { text-decoration: line-through; }
+
+        dialog { border-radius: 24px; border: 4px solid var(--snoopy-black); padding: 0; background: #fff; width: 90%; max-width: 400px; z-index: 100; box-shadow: 8px 8px 0px rgba(0,0,0,0.2); }
+        dialog::backdrop { background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(2px); z-index: 99; }
+        
+        .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        .calc-btn { 
+            height: 60px; border-radius: 16px; background: white; color: var(--snoopy-black); 
+            font-size: 22px; font-weight: 700; border: 3px solid var(--snoopy-black); 
+            box-shadow: 3px 3px 0 var(--snoopy-black); display: flex; align-items: center; justify-content: center; 
+            transition: all 0.1s; cursor: pointer;
+        }
+        .calc-btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--snoopy-black); }
+        .calc-btn-op { background: var(--snoopy-yellow); }
+        .calc-btn-eq { background: var(--snoopy-black); color: white; border-color: var(--snoopy-black); }
+
+        /* Child Friendly Badge */
+        .child-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 4px 8px; border-radius: 12px;
+            font-size: 0.75rem; font-weight: bold;
+            border: 2px solid var(--snoopy-black);
+            background: #fff; box-shadow: 2px 2px 0px rgba(0,0,0,0.1);
+        }
+        .child-badge.good { background: #86efac; color: #064e3b; }
+        .child-badge.meh { background: #fca5a5; color: #7f1d1d; }
+
+        input, select, textarea {
+            font-family: 'Fredoka', sans-serif;
+        }
+    </style>
+</head>
+<body>
+
+<div id="error-toast" style="display:none; position:fixed; top:0; left:0; right:0; background:red; color:white; padding:10px; z-index:9999; font-size:12px; font-weight:bold; text-align:center;"></div>
+
+<div class="app-container p-4">
+    
+    <!-- 0. 首頁 -->
+    <div id="view-home" class="active-view home-safe-padding">
+        <header class="mb-6 flex justify-between items-start">
+            <div onclick="window.app.openTripIdModal()" class="cursor-pointer">
+                <div class="inline-block bg-black text-white text-xs font-bold px-2 py-1 rounded-lg mb-1 transform -rotate-2">TRIP PLANNER</div>
+                <h1 class="text-4xl font-black text-black tracking-tighter uppercase break-all" style="text-shadow: 2px 2px 0px #fff;">HELLO<br><span id="home-title-text" class="text-white text-5xl" style="text-shadow: 3px 3px 0px #000; -webkit-text-stroke: 2px black;">TRAVEL!</span></h1>
+                <div class="flex items-center mt-2 text-xs font-bold text-stone-800 bg-white inline-block px-2 py-1 rounded-lg border-2 border-black shadow-sm">
+                    <div id="auth-status-dot" class="w-2 h-2 bg-green-500 rounded-full inline-block mr-1 border border-black"></div>
+                    <span id="auth-status-text">ONLINE</span>
+                </div>
+            </div>
+            <button onclick="window.app && window.app.openCalculator()" class="bg-white text-black border-4 border-black w-14 h-14 rounded-2xl flex items-center justify-center shadow-[4px_4px_0px_#000] active:translate-y-1 active:shadow-[2px_2px_0px_#000] transition-all">
+                <i data-lucide="calculator" class="w-7 h-7"></i>
+            </button>
+        </header>
+
+        <div class="grid grid-cols-2 gap-4 pb-20">
+            <!-- 行程 (上方大格) -->
+            <button onclick="window.app.switchView('itinerary')" class="card-comic col-span-2 flex flex-row gap-4 items-center p-6 h-40 bg-white relative group">
+                <div class="bg-black text-white p-4 rounded-full border-4 border-black z-10 w-16 h-16 flex items-center justify-center mb-4 group-active:scale-90 transition-transform">
+                    <i data-lucide="map" class="w-8 h-8 !text-white !m-0"></i>
+                </div>
+                <div class="flex-grow text-left z-10">
+                    <span class="block text-4xl font-black text-black tracking-tight">ITINERARY</span>
+                    <span class="text-sm font-bold bg-yellow-300 px-2 py-1 rounded border-2 border-black inline-block transform -rotate-2">Let's Go!</span>
+                </div>
+                <!-- Snoopy house decoration -->
+                <div class="absolute -right-4 -bottom-8 w-32 h-32 bg-red-500 rounded-full border-4 border-black z-0"></div>
+                <i data-lucide="arrow-right" class="w-8 h-8 z-10 text-black absolute bottom-6 right-6"></i>
+            </button>
+
+            <!-- 四大功能格 -->
+            <button onclick="window.app.switchView('wishlist')" class="card-comic menu-icon bg-white active:bg-gray-50">
+                <i data-lucide="heart" class="text-red-500 fill-red-500"></i>
+                <span>Wishlist</span>
+                <div class="subtitle">許願清單</div>
+            </button>
+
+            <button onclick="window.app.switchView('packing')" class="card-comic menu-icon bg-white active:bg-gray-50">
+                <i data-lucide="luggage" class="text-blue-500"></i>
+                <span>Packing</span>
+                <div class="subtitle">行李檢查</div>
+            </button>
+
+            <button onclick="window.app.switchView('mustbuy')" class="card-comic menu-icon bg-white active:bg-gray-50">
+                <i data-lucide="shopping-bag" class="text-orange-500"></i>
+                <span>Must Buy</span>
+                <div class="subtitle">必買戰利品</div>
+            </button>
+
+            <!-- 工具箱 -->
+            <button onclick="window.app.openTools()" class="card-comic menu-icon bg-white active:bg-gray-50">
+                <i data-lucide="wrench"></i>
+                <span>Tools</span>
+                <div class="subtitle">實用小工具</div>
+            </button>
+
+            <!-- 設定/切換旅程 -->
+            <button onclick="window.app.openTripIdModal()" class="card-comic menu-icon bg-white active:bg-gray-50">
+                <i data-lucide="settings"></i>
+                <span>Config</span>
+                <div class="subtitle">切換旅程</div>
+            </button>
+            
+            <!-- Snoopy GIF Frame -->
+            <div id="pet-frame" class="card-comic menu-icon p-0 bg-stone-200 overflow-hidden flex items-center justify-center bg-white relative">
+                <img src="https://media.giphy.com/media/aeu60CPZd8zw4/giphy.gif" class="w-full h-full object-cover" alt="Snoopy Dance">
+                <div class="absolute bottom-0 w-full bg-white/90 border-t-2 border-black p-1 text-center font-bold text-xs uppercase">
+                    <i data-lucide="music" class="w-3 h-3 inline mr-1 text-yellow-500 fill-yellow-500"></i> Happy Trip
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1. 行程 -->
+    <div id="view-itinerary" class="hidden-view">
+        <div class="sticky-header-safe header-bar">
+            <button onclick="window.app.goHome()" class="back-btn"><i data-lucide="arrow-left" class="w-6 h-6"></i></button>
+            <h2 class="font-black text-3xl tracking-tight text-black">ITINERARY</h2>
+            <div class="flex gap-2">
+                 <!-- 導覽到 Wishlist -->
+                 <button onclick="window.app.switchView('wishlist')" class="w-11 h-11 flex items-center justify-center rounded-full border-3 border-black bg-white shadow-[2px_2px_0px_#000] active:translate-y-1 active:shadow-none transition-all"><i data-lucide="heart" class="w-5 h-5 text-red-500"></i></button>
+                 <!-- 導覽到 Mustbuy (新增) -->
+                 <button onclick="window.app.switchView('mustbuy')" class="w-11 h-11 flex items-center justify-center rounded-full border-3 border-black bg-white shadow-[2px_2px_0px_#000] active:translate-y-1 active:shadow-none transition-all"><i data-lucide="shopping-bag" class="w-5 h-5 text-orange-500"></i></button>
+            </div>
+        </div>
+        
+        <div id="date-weather-header" class="mb-4 pl-1 hidden bg-white border-3 border-black rounded-xl p-3 shadow-[4px_4px_0px_#60a5fa] mt-2 flex items-center justify-between">
+             <h3 class="font-black text-2xl text-black uppercase" id="header-date"></h3>
+             <div id="header-weather" class="inline-flex items-center text-black font-bold"></div>
+        </div>
+
+        <div id="nav-dates" class="flex overflow-x-auto gap-3 pb-4 mb-2 pt-2 px-1"></div>
+        
+        <div id="section-memo" class="hidden">
+             <div id="list-memo" class="space-y-4"></div>
+             <div class="flow-btn-container mt-4">
+                 <button onclick="window.app.openMemoModal()" class="big-action-btn bg-white text-black"><i data-lucide="sticky-note" class="w-5 h-5"></i> 寫筆記</button>
+            </div>
+        </div>
+
+        <div id="section-itinerary" class="pt-2">
+            <div id="list-itinerary" class="pl-2 relative space-y-6 min-h-[200px]"></div>
+            <div id="btn-itin-add-container" class="flow-btn-container mt-8 pb-8">
+                 <button onclick="window.app.openItineraryModal()" class="big-action-btn btn-yellow"><i data-lucide="plus-circle" class="w-6 h-6"></i> 新增行程</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. 行李 (Packing) -->
+    <div id="view-packing" class="hidden-view">
+        <div class="sticky-header-safe header-bar">
+            <button onclick="window.app.goHome()" class="back-btn"><i data-lucide="arrow-left" class="w-6 h-6"></i></button>
+            <h2 class="font-black text-3xl tracking-tight text-black">PACKING</h2>
+            <!-- 導覽回到 Itinerary (完成循環) -->
+            <button onclick="window.app.switchView('itinerary')" class="w-11 h-11 flex items-center justify-center rounded-full border-3 border-black bg-white shadow-[2px_2px_0px_#000] active:translate-y-1 active:shadow-none transition-all"><i data-lucide="map" class="w-5 h-5 text-black"></i></button>
+        </div>
+        
+        <!-- Import Default Button -->
+        <div class="mt-4 mb-6">
+            <button onclick="window.app.importDefaultPacking()" class="w-full py-3 bg-blue-100 border-3 border-black rounded-xl font-bold text-black flex items-center justify-center gap-2 shadow-[3px_3px_0px_#000] active:translate-y-1 active:shadow-none transition-all">
+                <i data-lucide="list-plus" class="w-5 h-5"></i> 媽咪懶人包 (一鍵匯入)
+            </button>
+        </div>
+
+        <div id="packing-container" class="space-y-6 pb-24"></div>
+        
+        <div class="fixed bottom-6 left-0 right-0 px-4 flex justify-center">
+             <button onclick="document.getElementById('dialog-packing').showModal()" class="big-action-btn btn-blue w-full max-w-[400px]"><i data-lucide="package-plus" class="w-6 h-6"></i> 加東西</button>
+        </div>
+    </div>
+
+    <!-- 3. 慾望清單 (Wishlist) -->
+    <div id="view-wishlist" class="hidden-view">
+        <div class="sticky-header-safe header-bar">
+            <button onclick="window.app.goHome()" class="back-btn"><i data-lucide="arrow-left" class="w-6 h-6"></i></button>
+            <h2 class="font-black text-3xl tracking-tight text-black">WISHLIST</h2>
+            <!-- 導覽到 Must Buy -->
+            <button onclick="window.app.switchView('mustbuy')" class="w-11 h-11 flex items-center justify-center rounded-full border-3 border-black bg-white shadow-[2px_2px_0px_#000] active:translate-y-1 active:shadow-none transition-all"><i data-lucide="shopping-bag" class="w-5 h-5 text-orange-500"></i></button>
+        </div>
+        <div id="list-wishlist" class="space-y-6 mt-4 pb-24"></div>
+        <div class="fixed bottom-6 left-0 right-0 px-4 flex justify-center">
+             <button onclick="window.app.openWishlistModal()" class="big-action-btn btn-red w-full max-w-[400px]"><i data-lucide="heart-handshake" class="w-6 h-6"></i> 許願！</button>
+        </div>
+    </div>
+
+    <!-- 4. 必買清單 (Must Buy) -->
+    <div id="view-mustbuy" class="hidden-view">
+        <div class="sticky-header-safe header-bar">
+            <button onclick="window.app.goHome()" class="back-btn"><i data-lucide="arrow-left" class="w-6 h-6"></i></button>
+            <h2 class="font-black text-3xl tracking-tight text-black">MUST BUY</h2>
+            <!-- 導覽到 Packing -->
+            <button onclick="window.app.switchView('packing')" class="w-11 h-11 flex items-center justify-center rounded-full border-3 border-black bg-white shadow-[2px_2px_0px_#000] active:translate-y-1 active:shadow-none transition-all"><i data-lucide="luggage" class="w-5 h-5 text-blue-500"></i></button>
+        </div>
+        <div id="mustbuy-container" class="space-y-6 mt-4 pb-24"></div>
+        <div class="fixed bottom-6 left-0 right-0 px-4 flex justify-center">
+             <button onclick="window.app.openMustBuyModal()" class="big-action-btn btn-yellow w-full max-w-[400px]"><i data-lucide="shopping-cart" class="w-6 h-6"></i> 新增必買</button>
+        </div>
+    </div>
+
+</div>
+
+<!-- FAB -->
+<button id="fab-calc" onclick="window.app && window.app.openCalculator()" class="fixed bottom-24 right-5 w-16 h-16 rounded-full bg-yellow-400 border-4 border-black shadow-[4px_4px_0px_#000] z-50 flex items-center justify-center hidden active:scale-90 transition-transform">
+    <i data-lucide="calculator" class="w-8 h-8 text-black"></i>
+</button>
+
+<!-- 旅程ID切換彈窗 -->
+<dialog id="dialog-trip-id">
+    <div class="p-6 text-center">
+        <h3 class="font-black text-2xl text-black mb-2 uppercase">Switch Trip</h3>
+        <p class="text-sm text-stone-500 font-bold mb-4">輸入 ID 切換旅程<br>(資料不會消失)</p>
+        <input type="text" id="trip-id-input" class="w-full bg-yellow-50 p-3 rounded-xl font-bold outline-none border-3 border-black focus:bg-white mb-4 text-center text-xl uppercase" placeholder="如: TOKYO_2025">
+        <div id="trip-history" class="mb-6 flex flex-wrap gap-2 justify-center"></div>
+        <div class="flex gap-3">
+            <button onclick="document.getElementById('dialog-trip-id').close()" class="flex-1 py-3 font-bold text-black bg-white border-3 border-black rounded-xl shadow-[2px_2px_0px_#000]">CANCEL</button>
+            <button onclick="window.app.confirmTripId()" class="flex-1 py-3 font-black text-white bg-black border-3 border-black rounded-xl shadow-[2px_2px_0px_#666]">GO!</button>
+        </div>
+    </div>
+</dialog>
+
+<!-- 工具箱彈窗 -->
+<dialog id="dialog-tools">
+    <div class="p-5">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="font-black text-2xl text-black">TOOLS</h3>
+            <button type="button" onclick="document.getElementById('dialog-tools').close()" class="p-2 bg-stone-100 rounded-full border-2 border-black hover:bg-red-100"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+        <div class="space-y-3">
+            <a href="https://www.vjw.digital.go.jp/" target="_blank" class="block w-full bg-white hover:bg-yellow-50 p-4 rounded-xl border-3 border-black font-bold text-black flex items-center shadow-[3px_3px_0px_#000] active:translate-y-1 active:shadow-none transition-all"><span class="text-2xl mr-3">🇯🇵</span> Visit Japan Web</a>
+            <a href="https://translate.google.com/?sl=auto&tl=zh-TW&op=translate" target="_blank" class="block w-full bg-white hover:bg-yellow-50 p-4 rounded-xl border-3 border-black font-bold text-black flex items-center shadow-[3px_3px_0px_#000] active:translate-y-1 active:shadow-none transition-all"><span class="text-2xl mr-3">🗣️</span> Google Translate</a>
+            <a href="https://world.jorudan.co.jp/mln/zh-tw/" target="_blank" class="block w-full bg-white hover:bg-yellow-50 p-4 rounded-xl border-3 border-black font-bold text-black flex items-center shadow-[3px_3px_0px_#000] active:translate-y-1 active:shadow-none transition-all"><span class="text-2xl mr-3">🚇</span> 轉乘案內 (Jorudan)</a>
+            <a href="https://tenki.jp/" target="_blank" class="block w-full bg-white hover:bg-yellow-50 p-4 rounded-xl border-3 border-black font-bold text-black flex items-center shadow-[3px_3px_0px_#000] active:translate-y-1 active:shadow-none transition-all"><span class="text-2xl mr-3">☁️</span> 天氣預報 (Tenki.jp)</a>
+            <a href="https://rate.bot.com.tw/xrt?Lang=zh-TW" target="_blank" class="block w-full bg-white hover:bg-yellow-50 p-4 rounded-xl border-3 border-black font-bold text-black flex items-center shadow-[3px_3px_0px_#000] active:translate-y-1 active:shadow-none transition-all"><span class="text-2xl mr-3">💱</span> 台灣銀行匯率</a>
+        </div>
+    </div>
+</dialog>
+
+<!-- 錯誤提示 -->
+<dialog id="dialog-alert">
+    <div class="p-6 text-center">
+        <h3 class="font-black text-2xl text-red-500 mb-2">OOPS!</h3>
+        <p id="alert-msg" class="text-black text-base font-bold mb-6"></p>
+        <button onclick="document.getElementById('dialog-alert').close()" class="w-full py-3 font-black text-white bg-black border-3 border-black rounded-xl">OK</button>
+    </div>
+</dialog>
+
+<!-- 計算機 -->
+<dialog id="dialog-calculator">
+    <div class="p-4 bg-yellow-50">
+        <div class="flex justify-between items-center mb-4">
+            <div class="text-xs font-black text-black uppercase tracking-widest bg-yellow-300 px-2 py-1 rounded border-2 border-black">Calculator</div>
+            <button type="button" onclick="document.getElementById('dialog-calculator').close()" class="p-1 bg-white border-2 border-black rounded-full active:bg-gray-100"><i data-lucide="x" class="w-5 h-5 text-black"></i></button>
+        </div>
+        
+        <div class="bg-white rounded-xl px-3 py-4 mb-4 text-right border-3 border-black shadow-[3px_3px_0px_rgba(0,0,0,0.1)]">
+            <input type="text" id="calc-display" class="bg-transparent text-4xl font-black text-right outline-none text-black tracking-tighter w-full mb-1" placeholder="0" readonly>
+            <div class="text-orange-600 font-bold text-lg border-t-2 border-dashed border-gray-200 pt-2 flex justify-end items-center gap-2">
+                <span class="text-[10px] bg-orange-100 text-orange-700 px-1 rounded border border-orange-200">≈ TWD</span>
+                <span id="calc-res">0</span>
+            </div>
+        </div>
+        
+        <button type="button" onclick="window.app.toggleCurrency()" class="w-full mb-4 py-3 bg-black rounded-xl text-white text-sm font-bold flex items-center justify-center gap-2 active:bg-gray-800 shadow-[2px_2px_0_#888] active:shadow-none border-3 border-black transition-all">
+            <span id="calc-mode-text">JPY → TWD</span> <i data-lucide="arrow-left-right" class="w-4 h-4"></i>
+        </button>
+
+        <div class="calc-grid">
+            <button class="calc-btn bg-gray-100" onclick="window.app.calcClear()">AC</button>
+            <button class="calc-btn bg-gray-100" onclick="window.app.calcDel()"><i data-lucide="delete" class="w-6 h-6"></i></button>
+            <button class="calc-btn bg-gray-100" onclick="window.app.calcAppend('%')">%</button>
+            <button class="calc-btn calc-btn-op" onclick="window.app.calcAppend('/')">÷</button>
+            
+            <button class="calc-btn" onclick="window.app.calcAppend('7')">7</button>
+            <button class="calc-btn" onclick="window.app.calcAppend('8')">8</button>
+            <button class="calc-btn" onclick="window.app.calcAppend('9')">9</button>
+            <button class="calc-btn calc-btn-op" onclick="window.app.calcAppend('*')">×</button>
+            
+            <button class="calc-btn" onclick="window.app.calcAppend('4')">4</button>
+            <button class="calc-btn" onclick="window.app.calcAppend('5')">5</button>
+            <button class="calc-btn" onclick="window.app.calcAppend('6')">6</button>
+            <button class="calc-btn calc-btn-op" onclick="window.app.calcAppend('-')">−</button>
+            
+            <button class="calc-btn" onclick="window.app.calcAppend('1')">1</button>
+            <button class="calc-btn" onclick="window.app.calcAppend('2')">2</button>
+            <button class="calc-btn" onclick="window.app.calcAppend('3')">3</button>
+            <button class="calc-btn calc-btn-op" onclick="window.app.calcAppend('+')">+</button>
+            
+            <button class="calc-btn" style="grid-column: span 2;" onclick="window.app.calcAppend('0')">0</button>
+            <button class="calc-btn" onclick="window.app.calcAppend('.')">.</button>
+            <button class="calc-btn calc-btn-eq" onclick="window.app.calcEval()">=</button>
+        </div>
+    </div>
+</dialog>
+
+<!-- 行程編輯彈窗 (修正樣式) -->
+<dialog id="dialog-itinerary">
+    <!-- 修正: 移除 h-full, 改為 w-full, 這樣高度會由內容決定，不會塌陷 -->
+    <div class="p-5 relative bg-white w-full overflow-y-auto max-h-[85vh]">
+        <div class="flex justify-between items-center mb-6 sticky top-0 bg-white z-10 py-2 border-b-2 border-gray-100">
+            <h3 class="font-black text-xl text-black uppercase">Edit Plan</h3>
+            <div class="flex gap-2">
+                 <button type="button" onclick="window.app.deleteItinerary()" id="btn-del-itin" class="hidden p-2 bg-red-100 text-red-500 rounded-full border-2 border-red-200"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
+                 <button type="button" onclick="document.getElementById('dialog-itinerary').close()" class="p-2 bg-gray-100 rounded-full border-2 border-black"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+        </div>
+        <form id="form-itinerary" onsubmit="window.app.saveItinerary(event)" class="space-y-4 pb-4">
+            <input type="hidden" id="itin-id">
+            
+            <!-- 名稱與地圖 -->
+            <div class="space-y-2">
+                <input type="text" id="itin-title" placeholder="地點 / 行程名稱" class="w-full bg-white p-4 rounded-xl font-black text-xl outline-none border-3 border-black focus:bg-yellow-50" required oninput="window.app.updateGoogleBtn(this.value)">
+                
+                <div class="flex gap-2">
+                    <div class="relative flex-grow">
+                        <i data-lucide="map-pin" class="absolute left-3 top-3.5 w-4 h-4 text-gray-400"></i>
+                        <input type="text" id="itin-map" placeholder="Google Maps 連結" class="w-full bg-gray-50 p-3 pl-10 rounded-xl text-sm outline-none border-2 border-gray-200 focus:border-black font-bold text-blue-600">
+                    </div>
+                    <!-- 親子查詢按鈕 -->
+                    <a id="btn-check-kids" href="#" target="_blank" class="hidden bg-yellow-300 border-2 border-black rounded-xl px-3 flex items-center justify-center font-bold text-xs text-black shadow-sm active:translate-y-1">
+                        <i data-lucide="search" class="w-3 h-3 mr-1"></i> 查親子
+                    </a>
+                </div>
+            </div>
+
+            <!-- 時間與日期 -->
+            <div class="bg-gray-50 p-3 rounded-xl border-2 border-gray-200">
+                <label class="text-[10px] font-bold text-gray-400 uppercase block mb-1">Date & Time</label>
+                <div class="flex gap-2 mb-2">
+                    <input type="date" id="itin-date" class="flex-grow bg-white p-2 rounded-lg font-bold text-black outline-none border-2 border-gray-200" required>
+                    <select id="itin-cat" onchange="window.app.onCatChange(this.value)" class="w-24 bg-white p-2 rounded-lg font-bold outline-none border-2 border-gray-200">
+                        <option value="景點">景點</option>
+                        <option value="美食">美食</option>
+                        <option value="購物">購物</option>
+                        <option value="住宿">住宿</option>
+                        <option value="交通">交通</option>
+                        <option value="航班">航班</option>
+                    </select>
+                </div>
+                <div class="flex gap-2">
+                    <input type="time" id="itin-time" class="flex-1 bg-white p-2 rounded-lg font-bold outline-none border-2 border-gray-200 text-center">
+                    <span class="self-center font-bold text-gray-300">~</span>
+                    <input type="time" id="itin-end-time" class="flex-1 bg-white p-2 rounded-lg font-bold outline-none border-2 border-gray-200 text-center">
+                </div>
+            </div>
+            
+            <!-- 航班/住宿特殊欄位 -->
+            <div id="field-flight" class="hidden grid grid-cols-2 gap-3 bg-blue-50 p-3 rounded-xl border-2 border-blue-200">
+                <div>
+                    <label class="text-[10px] font-bold text-blue-400 uppercase block mb-1">From</label>
+                    <input type="text" id="itin-dep-code" placeholder="TPE" class="w-full font-bold bg-transparent outline-none uppercase text-xl">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-blue-400 uppercase block mb-1">To</label>
+                    <input type="text" id="itin-arr-code" placeholder="TYO" class="w-full font-bold bg-transparent outline-none uppercase text-xl">
+                </div>
+            </div>
+
+            <div id="field-nights" class="hidden">
+                 <div class="flex items-center gap-3 bg-orange-50 p-3 rounded-xl border-2 border-orange-200">
+                     <span class="font-bold text-orange-600 text-sm">住幾晚?</span>
+                     <input type="number" id="itin-nights" value="1" min="1" max="14" class="w-20 bg-white p-2 rounded-lg font-bold outline-none border-2 border-orange-200 text-center">
+                 </div>
+            </div>
+
+            <!-- 親子友善紀錄區 -->
+            <div class="bg-green-50 p-3 rounded-xl border-2 border-green-200 relative">
+                <div class="absolute -top-3 left-3 bg-green-500 text-white text-[10px] font-bold px-2 py-0.5 rounded border-2 border-green-700">FOR KIDS</div>
+                <div class="mt-2 space-y-2">
+                    <div class="flex justify-between items-center">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="kid-stroller" class="checkbox-custom w-5 h-5 border-2">
+                            <span class="text-sm font-bold text-green-900">推車方便</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="kid-nursing" class="checkbox-custom w-5 h-5 border-2">
+                            <span class="text-sm font-bold text-green-900">哺乳/尿布</span>
+                        </label>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-bold text-green-700">友善度:</span>
+                        <input type="range" id="kid-rating" min="0" max="5" step="1" class="flex-grow h-2 bg-green-200 rounded-lg appearance-none cursor-pointer">
+                        <span id="kid-rating-val" class="font-black text-green-700 w-4">0</span>
+                    </div>
+                    <input type="text" id="kid-notes" placeholder="親子筆記 (如: 有兒童椅)" class="w-full bg-white p-2 rounded-lg text-sm outline-none border-2 border-green-200">
+                </div>
+            </div>
+
+            <textarea id="itin-note" placeholder="一般備註..." class="w-full bg-gray-50 p-3 rounded-xl text-sm outline-none border-2 border-gray-200 focus:border-black h-20 resize-none font-medium"></textarea>
+            
+            <button type="submit" class="w-full bg-black text-white font-black py-4 rounded-xl shadow-[4px_4px_0px_#fcd34d] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all border-3 border-black text-lg">SAVE PLAN</button>
+        </form>
+    </div>
+</dialog>
+
+<!-- Packing Modal -->
+<dialog id="dialog-packing">
+    <div class="p-5 bg-white rounded-3xl">
+         <div class="flex justify-between items-center mb-4">
+            <h3 class="font-black text-xl text-black">ADD ITEM</h3>
+            <button type="button" onclick="document.getElementById('dialog-packing').close()" class="p-2 bg-gray-100 rounded-full border-2 border-black"><i data-lucide="x" class="w-5 h-5"></i></button>
+         </div>
+         <form onsubmit="window.app.savePacking(event)" class="space-y-3">
+             <div class="grid grid-cols-2 gap-2">
+                 <label class="cursor-pointer">
+                     <input type="radio" name="pack-cat-radio" value="大人 (Adults)" class="peer hidden" checked>
+                     <div class="p-3 border-2 border-gray-200 rounded-xl text-center font-bold text-gray-400 peer-checked:bg-yellow-300 peer-checked:text-black peer-checked:border-black">大人</div>
+                 </label>
+                 <label class="cursor-pointer">
+                     <input type="radio" name="pack-cat-radio" value="小孩 (Kids)" class="peer hidden">
+                     <div class="p-3 border-2 border-gray-200 rounded-xl text-center font-bold text-gray-400 peer-checked:bg-blue-300 peer-checked:text-black peer-checked:border-black">小孩</div>
+                 </label>
+                 <label class="cursor-pointer">
+                     <input type="radio" name="pack-cat-radio" value="通用 (General)" class="peer hidden">
+                     <div class="p-3 border-2 border-gray-200 rounded-xl text-center font-bold text-gray-400 peer-checked:bg-green-300 peer-checked:text-black peer-checked:border-black">通用</div>
+                 </label>
+                 <label class="cursor-pointer">
+                     <input type="radio" name="pack-cat-radio" value="電器/其他" class="peer hidden">
+                     <div class="p-3 border-2 border-gray-200 rounded-xl text-center font-bold text-gray-400 peer-checked:bg-gray-200 peer-checked:text-black peer-checked:border-black">其他</div>
+                 </label>
+             </div>
+             
+             <input type="text" id="pack-name" placeholder="物品名稱" class="w-full bg-gray-50 p-4 rounded-xl font-bold outline-none border-3 border-black focus:bg-yellow-50" required>
+             <button type="submit" class="w-full bg-black text-white font-bold py-4 rounded-xl shadow-[4px_4px_0px_#60a5fa] active:shadow-none active:translate-y-[2px] border-3 border-black mt-2">ADD ITEM</button>
+         </form>
+    </div>
+</dialog>
+
+<!-- Wishlist Modal -->
+<dialog id="dialog-wishlist">
+    <div class="p-5 bg-white rounded-3xl">
+         <div class="flex justify-between items-center mb-4">
+            <h3 class="font-black text-xl text-black">WISH ITEM</h3>
+            <button type="button" onclick="document.getElementById('dialog-wishlist').close()" class="p-2 bg-gray-100 rounded-full border-2 border-black"><i data-lucide="x" class="w-5 h-5"></i></button>
+         </div>
+         <form onsubmit="window.app.saveWishlist(event)" class="space-y-3">
+             <input type="hidden" id="wish-id">
+             <input type="text" id="wish-location" placeholder="地點 (如: 新宿, 表參道)" class="w-full bg-gray-50 p-4 rounded-xl font-bold outline-none border-3 border-black focus:bg-white" required>
+             <input type="text" id="wish-item" placeholder="許願項目" class="w-full bg-gray-50 p-4 rounded-xl font-bold outline-none border-3 border-black focus:bg-white" required>
+             <div class="relative">
+                <i data-lucide="link" class="absolute left-3 top-3.5 w-4 h-4 text-gray-400"></i>
+                <input type="text" id="wish-link" placeholder="網址或備註" class="w-full bg-gray-50 p-3 pl-10 rounded-xl text-sm outline-none border-2 border-gray-200 focus:border-black font-bold">
+            </div>
+             <label class="flex items-center justify-center gap-2 w-full padding-3 p-3 border-2 dashed border-gray-300 rounded-xl cursor-pointer hover:bg-gray-50 font-bold text-gray-500">
+                 <i data-lucide="camera" class="w-5 h-5"></i> 上傳圖片 (選填)
+                 <input type="file" id="wish-image" accept="image/*" class="hidden">
+             </label>
+             <div class="flex gap-2">
+                 <label class="flex-1 bg-white border-2 border-gray-200 rounded-xl p-3 flex items-center justify-center cursor-pointer has-[:checked]:border-black has-[:checked]:bg-yellow-100">
+                     <input type="radio" name="wish-type" value="eat" checked class="hidden">
+                     <span class="font-bold text-sm"><i data-lucide="utensils" class="w-4 h-4 inline mr-1"></i> EAT</span>
+                 </label>
+                 <label class="flex-1 bg-white border-2 border-gray-200 rounded-xl p-3 flex items-center justify-center cursor-pointer has-[:checked]:border-black has-[:checked]:bg-blue-100">
+                     <input type="radio" name="wish-type" value="buy" class="hidden">
+                     <span class="font-bold text-sm"><i data-lucide="shopping-bag" class="w-4 h-4 inline mr-1"></i> BUY</span>
+                 </label>
+             </div>
+             <button type="submit" class="w-full bg-black text-white font-bold py-4 rounded-xl shadow-[4px_4px_0px_#ef4444] active:shadow-none active:translate-y-[2px] border-3 border-black mt-2">SAVE WISH</button>
+         </form>
+    </div>
+</dialog>
+
+<!-- Mustbuy Modal -->
+<dialog id="dialog-mustbuy">
+    <div class="p-5 bg-white rounded-3xl">
+         <div class="flex justify-between items-center mb-4">
+            <h3 class="font-black text-xl text-black">MUST BUY</h3>
+            <button type="button" onclick="document.getElementById('dialog-mustbuy').close()" class="p-2 bg-gray-100 rounded-full border-2 border-black"><i data-lucide="x" class="w-5 h-5"></i></button>
+         </div>
+         <form onsubmit="window.app.saveMustBuy(event)" class="space-y-3">
+             <input type="hidden" id="mb-id">
+             <div class="relative">
+                 <input type="text" id="mb-category" list="mb-cat-list" placeholder="分類 (例: 送婆婆)" class="w-full bg-gray-50 p-4 rounded-xl font-bold outline-none border-3 border-black focus:bg-white" required>
+                 <datalist id="mb-cat-list">
+                     <option value="自用/補貨"></option>
+                     <option value="送家人/長輩"></option>
+                     <option value="送朋友/同事"></option>
+                     <option value="代購"></option>
+                 </datalist>
+             </div>
+             <input type="text" id="mb-name" placeholder="商品名稱" class="w-full bg-gray-50 p-4 rounded-xl font-bold outline-none border-3 border-black focus:bg-white" required>
+             <input type="text" id="mb-details" placeholder="備註/規格" class="w-full bg-gray-50 p-4 rounded-xl text-sm outline-none border-2 border-gray-200 focus:border-black">
+             <label class="flex items-center justify-center gap-2 w-full padding-3 p-3 border-2 dashed border-gray-300 rounded-xl cursor-pointer hover:bg-gray-50 font-bold text-gray-500">
+                 <i data-lucide="camera" class="w-5 h-5"></i> 上傳圖片 (選填)
+                 <input type="file" id="mb-image" accept="image/*" class="hidden">
+             </label>
+             <button type="submit" class="w-full bg-black text-white font-bold py-4 rounded-xl shadow-[4px_4px_0px_#fcd34d] active:shadow-none active:translate-y-[2px] border-3 border-black mt-2">SAVE ITEM</button>
+         </form>
+    </div>
+</dialog>
+
+<dialog id="dialog-memo">
+    <div class="p-5 bg-white rounded-3xl h-full flex flex-col">
+        <div class="flex justify-between items-center mb-4">
+           <h3 class="font-black text-xl text-black">MEMO</h3>
+           <button type="button" onclick="document.getElementById('dialog-memo').close()" class="p-2 bg-gray-100 rounded-full border-2 border-black"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+        <form id="form-memo" class="space-y-3 flex-grow flex flex-col">
+            <input type="hidden" id="memo-id">
+            <input type="text" id="memo-title" placeholder="標題" class="w-full bg-gray-50 p-4 rounded-xl font-black outline-none border-3 border-black focus:bg-white text-lg">
+            <textarea id="memo-content" placeholder="內容..." class="w-full flex-grow bg-gray-50 p-4 rounded-xl font-medium outline-none border-2 border-gray-200 focus:border-black resize-none h-48"></textarea>
+            <button type="button" onclick="window.app.saveMemo()" class="w-full bg-black text-white font-bold py-4 rounded-xl shadow-[4px_4px_0px_#fcd34d] active:shadow-none active:translate-y-[2px] border-3 border-black mt-2">SAVE</button>
+        </form>
+   </div>
+</dialog>
+
+<!-- Firebase & Logic -->
+<script type="module">
+    window.onerror = function(msg, url, line) {
+        const toast = document.getElementById('error-toast');
+        toast.style.display = 'block';
+        toast.innerText = `ERROR: ${msg} (Line ${line})`;
+        return false;
+    };
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCFbodSlPH_CBmQrISVVyyBgQmn7golSZI",
+      authDomain: "travel-fc0fd.firebaseapp.com",
+      projectId: "travel-fc0fd",
+      storageBucket: "travel-fc0fd.firebasestorage.app",
+      messagingSenderId: "648761523272",
+      appId: "1:648761523272:web:a3c62013ff13cdc43dac7d"
+    };
+
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy, serverTimestamp, writeBatch, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    let fbApp, auth, db;
+    try {
+        fbApp = initializeApp(firebaseConfig);
+        auth = getAuth(fbApp);
+        db = getFirestore(fbApp);
+    } catch (e) { console.error("Firebase init error", e); }
+    
+    // 預設改為 NAGOYA
+    const DEFAULT_TRIP_ID = "SNOOPY_NAGOYA_2025";
+    let currentTripId = localStorage.getItem('currentTripId') || DEFAULT_TRIP_ID;
+    
+    let userId = null;
+    let activeDate = '2025-12-14';
+    let cachedItinerary = [];
+    let cachedWishlist = [];
+    let cachedMustBuy = [];
+    let memoList = []; 
+    let calcVal = '0';
+    let currentRate = 0.22;
+    let sortableInstance = null;
+    
+    const compressImage = (file) => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 800;
+                    const scaleSize = MAX_WIDTH / img.width;
+                    if (img.width > MAX_WIDTH) {
+                        canvas.width = MAX_WIDTH;
+                        canvas.height = img.height * scaleSize;
+                    } else {
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                    }
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    resolve(canvas.toDataURL('image/jpeg', 0.7));
+                }
+            }
+            reader.onerror = (error) => reject(error);
+        });
+    };
+
+    const uiApp = {
+        calcMode: 'JPY_TWD',
+
+        init(user) {
+            userId = user.uid;
+            document.getElementById('auth-status-dot').classList.replace('bg-gray-300', 'bg-green-500');
+            this.updateTitle();
+            this.startListeners();
+            this.updateRate();
+            
+            // Rating slider listener
+            const range = document.getElementById('kid-rating');
+            const val = document.getElementById('kid-rating-val');
+            range.addEventListener('input', (e) => val.innerText = e.target.value);
+        },
+        
+        updateTitle() {
+            // 動態處理標題，移除 SNOOPY_, _2025 等字樣，只顯示地點
+            let display = currentTripId.toUpperCase();
+            // 簡單的清理邏輯，讓標題好看一點
+            display = display.replace('SNOOPY_', '').replace('_2025', '').replace('_2024', '').replace('_TRIP', '');
+            if(display.includes('_')) display = display.split('_')[0];
+            
+            const titleEl = document.getElementById('home-title-text');
+            if(titleEl) titleEl.innerText = display + "!";
+        },
+
+        openTripIdModal() {
+            document.getElementById('trip-id-input').value = currentTripId;
+            const historyDiv = document.getElementById('trip-history');
+            const history = this.getTripHistory();
+            historyDiv.innerHTML = history.map(id => 
+                `<button onclick="document.getElementById('trip-id-input').value = '${id}'; window.app.confirmTripId()" class="px-3 py-1 bg-yellow-100 text-xs font-bold rounded-lg text-black hover:bg-yellow-300 border border-black uppercase">${id}</button>`
+            ).join('');
+            document.getElementById('dialog-trip-id').showModal();
+        },
+
+        getTripHistory() {
+             try {
+                return JSON.parse(localStorage.getItem('tripHistory')) || [DEFAULT_TRIP_ID];
+            } catch { return [DEFAULT_TRIP_ID]; }
+        },
+        
+        confirmTripId() {
+            const newId = document.getElementById('trip-id-input').value;
+            if(newId && newId.trim() !== "") {
+                currentTripId = newId.trim();
+                localStorage.setItem('currentTripId', currentTripId);
+                let history = this.getTripHistory();
+                if (!history.includes(currentTripId)) {
+                    history.unshift(currentTripId);
+                    if(history.length > 5) history.pop();
+                    localStorage.setItem('tripHistory', JSON.stringify(history));
+                }
+                location.reload(); 
+            }
+        },
+
+        openTools() { document.getElementById('dialog-tools').showModal(); },
+
+        showCustomAlert(msg) {
+            document.getElementById('alert-msg').innerText = msg;
+            document.getElementById('dialog-alert').showModal();
+        },
+
+        getCol(name) { return collection(db, 'trips', currentTripId, name); },
+        getDocRef(colName, docId) { return doc(db, 'trips', currentTripId, colName, docId); },
+
+        switchView(view) {
+            document.getElementById('view-home').classList.add('hidden-view');
+            document.getElementById('view-home').classList.remove('active-view');
+            
+            ['itinerary', 'packing', 'wishlist', 'mustbuy'].forEach(v => {
+                const el = document.getElementById('view-' + v);
+                if (el) {
+                    if(v === view) { el.classList.remove('hidden-view'); el.classList.add('active-view'); } 
+                    else { el.classList.add('hidden-view'); el.classList.remove('active-view'); }
+                }
+            });
+
+            const fab = document.getElementById('fab-calc');
+            if(view === 'view-home') fab.style.display = 'none';
+            else fab.style.display = 'flex';
+            
+            if(view === 'itinerary') uiApp.renderItinerary();
+            if(window.lucide) window.lucide.createIcons();
+        },
+        
+        goHome() {
+            document.querySelectorAll('.active-view').forEach(el => { el.classList.add('hidden-view'); el.classList.remove('active-view'); });
+            document.getElementById('view-home').classList.remove('hidden-view');
+            document.getElementById('view-home').classList.add('active-view');
+            document.getElementById('fab-calc').style.display = 'none';
+        },
+        
+        startListeners() {
+            if(!db || !userId) return;
+            try {
+                const qItin = query(uiApp.getCol('itinerary'), orderBy('date'));
+                onSnapshot(qItin, (snap) => {
+                    cachedItinerary = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                    cachedItinerary.sort((a, b) => {
+                        const d = a.date.localeCompare(b.date);
+                        if(d !== 0) return d;
+                        
+                        const isHotelA = a.cat === '住宿';
+                        const isHotelB = b.cat === '住宿';
+                        if (isHotelA && !isHotelB) return 1;
+                        if (!isHotelA && isHotelB) return -1;
+
+                        const tA = a.time || '';
+                        const tB = b.time || '';
+                        if (tA !== tB) return tA.localeCompare(tB);
+                        if (a.order !== undefined && b.order !== undefined) return a.order - b.order;
+                        return 0;
+                    });
+                    uiApp.renderItinerary();
+                });
+
+                onSnapshot(query(uiApp.getCol('memos'), orderBy('createdAt')), (snap) => {
+                    memoList = snap.docs.map(d=>({id:d.id, ...d.data()}));
+                    uiApp.renderMemo(memoList);
+                });
+                onSnapshot(query(uiApp.getCol('packing')), (snap) => uiApp.renderPacking(snap.docs.map(d=>({id:d.id, ...d.data()}))));
+                onSnapshot(query(uiApp.getCol('wishlist'), orderBy('createdAt')), (snap) => {
+                    cachedWishlist = snap.docs.map(d=>({id:d.id, ...d.data()}));
+                    uiApp.renderWishlist(cachedWishlist);
+                });
+                onSnapshot(query(uiApp.getCol('mustbuy'), orderBy('createdAt')), (snap) => {
+                    cachedMustBuy = snap.docs.map(d=>({id:d.id, ...d.data()}));
+                    uiApp.renderMustBuy(cachedMustBuy);
+                });
+            } catch(e) { console.error("Listener init failed", e); }
+        },
+
+        onCatChange(val) {
+             const flightFields = document.getElementById('field-flight');
+             const nightFields = document.getElementById('field-nights');
+             if(val === '航班') {
+                 flightFields.classList.remove('hidden');
+                 nightFields.classList.add('hidden');
+             } else if(val === '住宿') {
+                 flightFields.classList.add('hidden');
+                 nightFields.classList.remove('hidden');
+             } else {
+                 flightFields.classList.add('hidden');
+                 nightFields.classList.add('hidden');
+             }
+        },
+        
+        updateGoogleBtn(val) {
+            const btn = document.getElementById('btn-check-kids');
+            if(val && val.length > 1) {
+                btn.href = `https://www.google.com/search?q=${encodeURIComponent(val + ' 親子友善 stroller accessible')}`;
+                btn.classList.remove('hidden');
+                btn.classList.add('flex');
+            } else {
+                btn.classList.add('hidden');
+                btn.classList.remove('flex');
+            }
+        },
+
+        renderItinerary() {
+            const container = document.getElementById('list-itinerary');
+            const tabs = document.getElementById('nav-dates');
+            if(!container) return;
+            
+            if(sortableInstance) { sortableInstance.destroy(); sortableInstance = null; }
+
+            const uniqueDates = [...new Set(cachedItinerary.map(i => i.date))].sort();
+            let allDates = [];
+
+            if (uniqueDates.length > 0) {
+                const minDate = new Date(uniqueDates[0]);
+                const maxDate = new Date(uniqueDates[uniqueDates.length - 1]);
+                for (let d = new Date(minDate); d <= maxDate; d.setDate(d.getDate() + 1)) {
+                    allDates.push(d.toISOString().split('T')[0]);
+                }
+            } else {
+                allDates.push(new Date().toISOString().split('T')[0]);
+            }
+            
+            let tabsHtml = `<div onclick="window.app.switchDate('0')" class="date-tab ${activeDate==='0'?'active':''}"><span class="day-label">ALL</span><span class="date-num">★</span></div>`;
+            tabsHtml += allDates.map(d => {
+                const dateObj = new Date(d);
+                return `<div onclick="window.app.switchDate('${d}')" class="date-tab ${activeDate===d?'active':''}"><span class="day-label text-xs">${dateObj.toLocaleDateString('en-US',{month:'short'}).toUpperCase()}</span><span class="date-num text-xl">${dateObj.getDate()}</span></div>`;
+            }).join('');
+            tabs.innerHTML = tabsHtml;
+            
+            if(activeDate !== '0' && !allDates.includes(activeDate) && allDates.length > 0) {
+                activeDate = allDates[0];
+            }
+
+            const isPre = activeDate === '0';
+            document.getElementById('section-memo').className = isPre ? 'block' : 'hidden';
+            document.getElementById('section-itinerary').className = isPre ? 'hidden' : 'block';
+            document.getElementById('btn-itin-add-container').style.display = isPre ? 'none' : 'flex';
+            
+            const weatherHeader = document.getElementById('date-weather-header');
+            const headerDate = document.getElementById('header-date');
+            const headerWeather = document.getElementById('header-weather');
+
+            if(!isPre) {
+                weatherHeader.classList.remove('hidden');
+                const items = cachedItinerary.filter(i => i.date === activeDate);
+                const dateObj = new Date(activeDate);
+                
+                headerDate.innerText = `${dateObj.toLocaleDateString('en-US', {weekday:'short'})} ${dateObj.getDate()}`;
+                
+                uiApp.fetchWeather(activeDate, (wCode, temp) => {
+                    let iconName = 'cloud';
+                    if (wCode <= 1) iconName = 'sun';
+                    else if (wCode <= 3) iconName = 'cloud-sun';
+                    else if (wCode <= 67) iconName = 'cloud-rain';
+                    else if (wCode >= 95) iconName = 'cloud-lightning';
+                    headerWeather.innerHTML = `<i data-lucide="${iconName}" class="w-6 h-6 mr-2 text-blue-500"></i><span>${temp}</span>`;
+                    if(window.lucide) window.lucide.createIcons();
+                });
+
+                let html = `<div id="timeline-sortable" class="timeline-container relative pb-10">`; 
+                if(items.length === 0) html += `<div class="text-gray-400 text-center py-10 font-bold">NO PLANS YET</div>`;
+                
+                items.forEach(item => {
+                    const handleHtml = `<div class="drag-handle absolute right-2 top-2 p-2 touch-none cursor-grab hover:bg-yellow-50 rounded-full transition-colors"><i data-lucide="menu" class="w-5 h-5 text-gray-300"></i></div>`;
+                    
+                    const hasNote = item.note && item.note.trim().length > 0;
+                    const noteId = `note-${item.id}`;
+                    const noteIndicator = hasNote ? `<button onclick="event.stopPropagation(); document.getElementById('${noteId}').classList.toggle('hidden')" class="ml-2 text-yellow-500 hover:text-yellow-600 transition-colors p-1"><i data-lucide="sticky-note" class="w-4 h-4"></i></button>` : '';
+                    const noteHtml = hasNote ? `<div id="${noteId}" class="hidden mt-3 text-sm text-gray-600 font-medium border-l-4 border-yellow-300 pl-2 whitespace-pre-wrap animate-fade-in">${item.note}</div>` : '';
+
+                    // Child Friendly Badge Logic
+                    let kidBadge = '';
+                    if (item.kidInfo) {
+                        const score = parseInt(item.kidInfo.rating) || 0;
+                        if(score >= 4) {
+                            kidBadge = `<div class="child-badge good"><i data-lucide="smile" class="w-3 h-3"></i> KIDS OK</div>`;
+                        } else if (item.kidInfo.stroller || item.kidInfo.nursing) {
+                             kidBadge = `<div class="child-badge good"><i data-lucide="baby" class="w-3 h-3"></i></div>`;
+                        }
+                    }
+
+                    if(item.cat === '航班') {
+                         html += `
+                         <div class="timeline-item group" data-id="${item.id}" onclick="window.app.openItineraryModal('${item.id}')">
+                            <div class="timeline-line"></div>
+                            <div class="bg-white border-3 border-black rounded-2xl p-4 relative shadow-[4px_4px_0px_#60a5fa] mb-6 ml-8 active:scale-98 transition-transform cursor-pointer">
+                                ${handleHtml}
+                                <div class="flex justify-between items-center mb-4 border-b-2 border-dashed border-gray-300 pb-2">
+                                    <div class="font-bold text-gray-500 text-xs flex items-center gap-2"><i data-lucide="plane" class="w-4 h-4"></i> FLIGHT ${noteIndicator}</div>
+                                </div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <div class="text-center">
+                                        <div class="text-3xl font-black text-black">${item.depCode || 'TPE'}</div>
+                                        <div class="text-xs font-bold text-gray-400 mt-1">${item.time || '--:--'}</div>
+                                    </div>
+                                    <i data-lucide="move-right" class="text-blue-400 w-6 h-6"></i>
+                                    <div class="text-center">
+                                        <div class="text-3xl font-black text-black">${item.arrCode || 'TYO'}</div>
+                                        <div class="text-xs font-bold text-gray-400 mt-1">${item.endTime ? item.endTime : 'ARR'}</div>
+                                    </div>
+                                </div>
+                                <div class="text-center mt-2 font-bold text-blue-600 bg-blue-50 rounded-lg py-1 text-sm border-2 border-blue-100">
+                                    ${item.title || 'FLIGHT'}
+                                </div>
+                                ${noteHtml}
+                            </div>
+                         </div>`;
+                    } else if(item.cat === '交通') {
+                        html += `<div class="timeline-item" data-id="${item.id}" onclick="window.app.openItineraryModal('${item.id}')">
+                            <div class="timeline-line"></div>
+                            <div class="flex items-center gap-3 mb-4 timeline-content-wrapper">
+                                <div class="w-10 h-10 bg-black rounded-full flex items-center justify-center text-white z-10 border-2 border-white flex-shrink-0 shadow-md"><i data-lucide="train-front" class="w-5 h-5"></i></div>
+                                <div class="bg-white border-2 border-black px-3 py-2 rounded-lg text-xs font-bold text-black flex-grow relative pr-10 group active:scale-98 transition-transform cursor-pointer shadow-[2px_2px_0px_#9ca3af]">
+                                    ${item.time} ${item.title} <span class="opacity-50 flex items-center inline-block align-middle">${noteIndicator}</span>
+                                    <div class="drag-handle absolute right-1 top-1/2 -translate-y-1/2 p-2 touch-none cursor-grab"><i data-lucide="menu" class="w-4 h-4 text-gray-400"></i></div>
+                                    ${noteHtml}
+                                </div>
+                            </div></div>`;
+                    } else {
+                        const isHotel = item.cat === '住宿';
+                        const dotColor = isHotel ? 'background:#ef4444' : 'background:#fff';
+                        
+                        const mapUrl = item.map ? item.map : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.title)}`;
+                        const mapBtn = `<a href="${mapUrl}" target="_blank" onclick="event.stopPropagation()" class="bg-gray-100 hover:bg-black hover:text-white text-gray-600 px-3 py-1 rounded-lg text-xs font-black border-2 border-gray-200 transition-colors flex items-center gap-1"><i data-lucide="map" class="w-3 h-3"></i> MAP</a>`;
+
+                        html += `<div class="timeline-item group cursor-pointer" data-id="${item.id}" onclick="window.app.openItineraryModal('${item.id}')">
+                            <div class="timeline-line"></div>
+                            <div class="timeline-dot" style="${dotColor}"></div>
+                            <div class="flex gap-3 mb-6 timeline-content-wrapper">
+                                <div class="w-12 text-right pt-2 font-black text-black text-sm flex-shrink-0 leading-tight">${item.time || ''}</div>
+                                <div class="flex-grow bg-white border-3 border-black rounded-2xl p-4 relative active:scale-98 transition-transform shadow-[4px_4px_0px_#000]">
+                                    ${handleHtml}
+                                    <div class="flex flex-col mb-1">
+                                        <h3 class="font-black text-lg uppercase leading-tight pr-8 mb-1">${item.title}</h3>
+                                        <div class="flex gap-2 items-center flex-wrap">
+                                            <span class="text-[10px] font-bold text-white bg-black px-1.5 py-0.5 rounded">#${item.cat}</span>
+                                            ${kidBadge}
+                                            ${noteIndicator}
+                                        </div>
+                                    </div>
+                                    ${noteHtml}
+                                    <div class="mt-3 flex justify-end">${mapBtn}</div>
+                                </div>
+                            </div>
+                        </div>`;
+                    }
+                });
+                html += `</div>`;
+                container.innerHTML = html;
+
+                const sortEl = document.getElementById('timeline-sortable');
+                if(sortEl) {
+                    sortableInstance = new Sortable(sortEl, {
+                        handle: '.drag-handle',
+                        animation: 150,
+                        ghostClass: 'sortable-ghost',
+                        dragClass: 'sortable-drag',
+                        onEnd: function(evt) { window.app.updateItineraryOrder(); }
+                    });
+                }
+            } else {
+                weatherHeader.classList.add('hidden');
+            }
+            if(window.lucide) window.lucide.createIcons();
+        },
+        switchDate(d) { activeDate = d; uiApp.renderItinerary(); },
+        async fetchWeather(dateStr, cb) { try { const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=35.6895&longitude=139.6917&daily=weathercode,temperature_2m_max&timezone=Asia%2FTokyo&start_date=${dateStr}&end_date=${dateStr}`); const data = await res.json(); const code = data.daily.weathercode[0]; const temp = data.daily.temperature_2m_max[0]; cb(code, `${Math.round(temp)}°C`); } catch(e) { cb(0, ''); } },
+        
+        renderMemo(items) {
+            const list = document.getElementById('list-memo');
+            list.innerHTML = items.map(item => `
+                <div class="bg-yellow-100 border-3 border-black rounded-xl p-4 mb-4 relative shadow-[3px_3px_0px_#000]">
+                    <div class="flex justify-between items-start mb-2 border-b-2 border-black/10 pb-2">
+                        <h3 class="font-black text-lg text-black uppercase">${item.title}</h3>
+                        <div class="flex gap-2">
+                            <button onclick="window.app.openMemoModal('${item.id}')" class="text-black/50 hover:text-black"><i data-lucide="edit-2" class="w-5 h-5"></i></button>
+                            <button onclick="event.stopPropagation(); window.app.delDoc('memos', '${item.id}')" class="text-black/50 hover:text-red-500"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
+                        </div>
+                    </div>
+                    <div class="text-sm font-medium text-stone-700 whitespace-pre-wrap">${item.content}</div>
+                </div>
+            `).join('');
+            if(window.lucide) window.lucide.createIcons();
+        },
+
+        renderPacking(items) {
+            const container = document.getElementById('packing-container');
+            const cats = ["大人 (Adults)", "小孩 (Kids)", "通用 (General)", "電器/其他"];
+            const catColors = {"大人 (Adults)": "bg-yellow-300", "小孩 (Kids)": "bg-blue-300", "通用 (General)": "bg-green-300", "電器/其他": "bg-gray-200"};
+
+            container.innerHTML = cats.map(cat => {
+                const filtered = items.filter(i => i.category === cat);
+                if(filtered.length === 0) return '';
+                const doneCount = filtered.filter(x=>x.checked).length;
+                const totalCount = filtered.length;
+                
+                return `<div class="bg-white border-3 border-black rounded-2xl overflow-hidden shadow-[4px_4px_0px_#000]">
+                    <div class="p-3 ${catColors[cat]} border-b-3 border-black flex justify-between items-center">
+                        <span class="font-black text-black uppercase">${cat}</span>
+                        <span class="text-xs font-black bg-white border-2 border-black px-2 py-0.5 rounded-full">${doneCount}/${totalCount}</span>
+                    </div>
+                    <div class="p-3 space-y-2">
+                        ${filtered.map(i => `
+                        <div class="flex items-center group">
+                            <input type="checkbox" class="checkbox-custom mr-3 scale-90" ${i.checked?'checked':''} onchange="window.app.togglePack('${i.id}', this.checked)">
+                            <span class="flex-grow font-bold ${i.checked?'line-through text-gray-300':'text-black'}">${i.name}</span>
+                            <button type="button" class="p-2 text-gray-300 hover:text-red-500" onclick="event.stopPropagation(); window.app.delDoc('packing', '${i.id}')"><i data-lucide="x" class="w-4 h-4"></i></button>
+                        </div>`).join('')}
+                    </div>
+                </div>`;
+            }).join('');
+            if(window.lucide) window.lucide.createIcons();
+        },
+
+        // 預設行李清單功能
+        async importDefaultPacking() {
+            const batch = writeBatch(db);
+            const defaults = [
+                {c: "大人 (Adults)", n: "護照/證件"}, {c: "大人 (Adults)", n: "錢包/信用卡"}, {c: "大人 (Adults)", n: "換洗衣物 (3套)"}, {c: "大人 (Adults)", n: "化妝/保養品"},
+                {c: "小孩 (Kids)", n: "尿布 (足量)"}, {c: "小孩 (Kids)", n: "濕紙巾"}, {c: "小孩 (Kids)", n: "奶瓶/奶粉"}, {c: "小孩 (Kids)", n: "安撫玩具/被被"}, {c: "小孩 (Kids)", n: "備用衣物 (多帶)"}, {c: "小孩 (Kids)", n: "兒童餐具/圍兜"}, {c: "小孩 (Kids)", n: "常備藥水"},
+                {c: "通用 (General)", n: "機票證明/VJW"}, {c: "通用 (General)", n: "常備藥品 (感冒/腸胃)"}, {c: "通用 (General)", n: "雨傘/雨衣"},
+                {c: "電器/其他", n: "SIM卡/漫遊"}, {c: "電器/其他", n: "充電線/行動電源"}, {c: "電器/其他", n: "轉接頭"}
+            ];
+            
+            defaults.forEach(item => {
+                const ref = doc(uiApp.getCol('packing'));
+                batch.set(ref, { name: item.n, category: item.c, checked: false, createdAt: serverTimestamp() });
+            });
+            
+            try { await batch.commit(); uiApp.showCustomAlert("預設清單匯入成功！"); } 
+            catch(e) { console.error(e); }
+        },
+
+        renderWishlist(items) {
+            const list = document.getElementById('list-wishlist');
+            const grouped = items.reduce((acc, item) => { (acc[item.location] = acc[item.location] || []).push(item); return acc; }, {});
+            
+            if(Object.keys(grouped).length === 0) { list.innerHTML = `<div class="text-center text-gray-400 font-bold py-10">MAKE A WISH!</div>`; return; }
+
+            list.innerHTML = Object.keys(grouped).map(loc => `
+                <div class="bg-white border-3 border-black rounded-2xl p-4 shadow-[4px_4px_0px_#ef4444]">
+                    <h3 class="font-black text-lg text-black border-b-2 border-black/10 pb-2 mb-3 flex items-center">
+                        <i data-lucide="map-pin" class="w-5 h-5 mr-2 text-red-500"></i> ${loc}
+                    </h3>
+                    <div class="space-y-3">
+                        ${grouped[loc].map(i => {
+                            let mapLink = '';
+                            const searchUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(i.location + ' ' + i.name)}`;
+                            mapLink = `<a href="${searchUrl}" target="_blank" onclick="event.stopPropagation()" class="text-[10px] font-black bg-gray-100 hover:bg-black hover:text-white text-gray-600 px-2 py-1 rounded ml-2 border border-gray-300 transition-colors">GO ↗</a>`;
+
+                            const hasImage = i.image && i.image.startsWith('data:image');
+                            const detailId = `wish-detail-${i.id}`;
+
+                            return `
+                            <div class="bg-gray-50 p-3 rounded-xl border-2 border-gray-200 cursor-pointer hover:bg-white hover:border-black transition-all group" onclick="document.getElementById('${detailId}') && document.getElementById('${detailId}').classList.toggle('hidden')">
+                                <div class="flex justify-between items-center">
+                                    <div class="flex items-center gap-3 overflow-hidden">
+                                        <div class="w-9 h-9 rounded-xl flex-shrink-0 flex items-center justify-center border-2 border-black ${i.type==='eat'?'bg-orange-100 text-orange-600':'bg-blue-100 text-blue-600'}">
+                                            <i data-lucide="${i.type==='eat'?'utensils':'shopping-bag'}" class="w-5 h-5"></i>
+                                        </div>
+                                        <div class="flex flex-col overflow-hidden">
+                                            <div class="flex items-center">
+                                                <span class="font-bold text-black truncate text-lg">${i.name}</span>
+                                                ${mapLink}
+                                            </div>
+                                            ${(i.link) ? `<div class="text-xs text-gray-500 font-bold truncate">${i.link}</div>` : ''}
+                                        </div>
+                                    </div>
+                                    <div class="flex-shrink-0 flex items-center">
+                                        ${hasImage ? `<i data-lucide="image" class="w-4 h-4 text-gray-400 mr-2"></i>` : ''}
+                                        <button onclick="event.stopPropagation(); window.app.openWishlistModal('${i.id}')" class="text-gray-300 hover:text-black p-2"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                                        <button onclick="event.stopPropagation(); window.app.delDoc('wishlist', '${i.id}')" class="text-gray-300 hover:text-red-500 p-2"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </div>
+                                </div>
+                                ${hasImage ? `<div id="${detailId}" class="hidden mt-2 animate-fade-in border-2 border-black rounded-lg overflow-hidden"><img src="${i.image}" class="w-full" /></div>` : ''}
+                            </div>
+                        `;
+                        }).join('')}
+                    </div>
+                </div>
+            `).join('');
+            if(window.lucide) window.lucide.createIcons();
+        },
+
+        renderMustBuy(items) {
+            const list = document.getElementById('mustbuy-container');
+            if(items.length === 0) { list.innerHTML = `<div class="text-center text-gray-400 font-bold py-10">Go Shopping!</div>`; return; }
+
+            const grouped = items.reduce((acc, item) => {
+                const cat = item.category || '未分類';
+                (acc[cat] = acc[cat] || []).push(item);
+                return acc;
+            }, {});
+
+            const catOrder = ["自用/補貨", "送家人/長輩", "送朋友/同事", "代購"];
+            const sortedKeys = Object.keys(grouped).sort((a, b) => {
+                const idxA = catOrder.indexOf(a);
+                const idxB = catOrder.indexOf(b);
+                if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+                if (idxA !== -1) return -1;
+                if (idxB !== -1) return 1;
+                return a.localeCompare(b);
+            });
+
+            list.innerHTML = sortedKeys.map(cat => {
+                const groupItems = grouped[cat];
+                groupItems.sort((a, b) => (a.checked === b.checked) ? 0 : a.checked ? 1 : -1);
+                const doneCount = groupItems.filter(i => i.checked).length;
+                
+                return `
+                <div class="bg-white border-3 border-black rounded-2xl p-4 shadow-[4px_4px_0px_#fcd34d]">
+                    <div class="flex justify-between border-b-2 border-gray-100 pb-2 mb-2">
+                        <span class="font-black text-lg uppercase text-black">${cat}</span>
+                        <span class="text-xs font-bold text-black bg-yellow-300 border-2 border-black px-2 py-1 rounded-full flex items-center">${doneCount}/${groupItems.length}</span>
+                    </div>
+                    <div class="space-y-3">
+                        ${groupItems.map(i => {
+                            const hasDetails = i.details && i.details.trim() !== '';
+                            const hasImage = i.image && i.image.startsWith('data:image');
+                            
+                            return `
+                            <div class="bg-gray-50 p-3 rounded-xl border-2 border-gray-200 flex flex-col transition-all ${i.checked ? 'opacity-50' : ''}">
+                                <div class="flex items-center gap-3">
+                                    <input type="checkbox" class="checkbox-custom" ${i.checked?'checked':''} onchange="window.app.toggleMustBuy('${i.id}', this.checked)">
+                                    <div class="flex-grow font-black text-lg text-black cursor-pointer" onclick="document.getElementById('mb-detail-${i.id}') && document.getElementById('mb-detail-${i.id}').classList.toggle('hidden')">
+                                        ${i.name} ${hasDetails || hasImage ? '<i data-lucide="info" class="w-3 h-3 inline text-blue-400 ml-1"></i>' : ''}
+                                    </div>
+                                    <div class="flex items-center">
+                                         <button onclick="event.stopPropagation(); window.app.openMustBuyModal('${i.id}')" class="text-gray-300 hover:text-black p-2"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                                         <button onclick="window.app.delDoc('mustbuy', '${i.id}')" class="text-gray-300 hover:text-red-500 p-2"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </div>
+                                </div>
+                                <div id="mb-detail-${i.id}" class="hidden mt-2 ml-9">
+                                    ${hasDetails ? `<div class="p-2 bg-yellow-50 text-yellow-800 font-bold text-sm rounded border border-yellow-200 mb-2">${i.details}</div>` : ''}
+                                    ${hasImage ? `<img src="${i.image}" class="w-full rounded border-2 border-black" />` : ''}
+                                </div>
+                            </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>`;
+            }).join('');
+            
+            if(window.lucide) window.lucide.createIcons();
+        },
+
+        startSlideshow() { 
+            let i = 0; 
+            const el = document.getElementById('pet-frame'); 
+            el.style.backgroundImage = `url(${kidPhotos[0]})`;
+            
+            setInterval(() => { 
+                i = (i + 1) % kidPhotos.length;
+                el.style.backgroundImage = `url(${kidPhotos[i]})`; 
+            }, 5000); 
+        },
+        
+        openItineraryModal(id=null) {
+            const form = document.getElementById('form-itinerary');
+            form.reset();
+            document.getElementById('itin-id').value = '';
+            document.getElementById('btn-del-itin').classList.add('hidden');
+            this.updateGoogleBtn(''); // Reset
+            
+            // Kids Reset
+            document.getElementById('kid-stroller').checked = false;
+            document.getElementById('kid-nursing').checked = false;
+            document.getElementById('kid-rating').value = 0;
+            document.getElementById('kid-rating-val').innerText = '0';
+            document.getElementById('kid-notes').value = '';
+
+            if(activeDate && activeDate !== '0') {
+                 document.getElementById('itin-date').value = activeDate;
+            } else {
+                 const firstDate = cachedItinerary.length > 0 ? cachedItinerary[0].date : new Date().toISOString().split('T')[0];
+                 document.getElementById('itin-date').value = firstDate;
+            }
+
+            if(id) {
+                const item = cachedItinerary.find(i => i.id === id);
+                if(item) {
+                    document.getElementById('itin-id').value = item.id;
+                    document.getElementById('itin-date').value = item.date;
+                    document.getElementById('itin-time').value = item.time;
+                    document.getElementById('itin-end-time').value = item.endTime || '';
+                    document.getElementById('itin-cat').value = item.cat;
+                    document.getElementById('itin-title').value = item.title;
+                    document.getElementById('itin-note').value = item.note;
+                    document.getElementById('itin-map').value = item.map;
+                    document.getElementById('itin-dep-code').value = item.depCode || 'TPE';
+                    document.getElementById('itin-arr-code').value = item.arrCode || 'TYO';
+                    document.getElementById('itin-nights').value = item.nights || 1;
+                    
+                    if(item.kidInfo) {
+                        document.getElementById('kid-stroller').checked = item.kidInfo.stroller || false;
+                        document.getElementById('kid-nursing').checked = item.kidInfo.nursing || false;
+                        document.getElementById('kid-rating').value = item.kidInfo.rating || 0;
+                        document.getElementById('kid-rating-val').innerText = item.kidInfo.rating || 0;
+                        document.getElementById('kid-notes').value = item.kidInfo.notes || '';
+                    }
+                    
+                    this.updateGoogleBtn(item.title);
+                    this.onCatChange(item.cat); 
+                    document.getElementById('btn-del-itin').classList.remove('hidden');
+                }
+            } else {
+                 this.onCatChange('景點'); 
+            }
+            document.getElementById('dialog-itinerary').showModal();
+        },
+        openMemoModal(id=null) {
+            const form = document.getElementById('form-memo');
+            form.reset();
+            document.getElementById('memo-id').value = '';
+            if(id) {
+                const item = memoList.find(i => i.id === id);
+                if(item) {
+                    document.getElementById('memo-id').value = item.id;
+                    document.getElementById('memo-title').value = item.title;
+                    document.getElementById('memo-content').value = item.content;
+                }
+            }
+            document.getElementById('dialog-memo').showModal();
+        },
+        openWishlistModal(id=null) {
+            const form = document.querySelector('#dialog-wishlist form');
+            form.reset();
+            document.getElementById('wish-id').value = '';
+            document.getElementById('wish-image').value = '';
+            
+            if(id) {
+                const item = cachedWishlist.find(i => i.id === id);
+                if(item) {
+                    document.getElementById('wish-id').value = item.id;
+                    document.getElementById('wish-location').value = item.location;
+                    document.getElementById('wish-item').value = item.name;
+                    document.getElementById('wish-link').value = item.link || '';
+                    const radio = form.querySelector(`input[name="wish-type"][value="${item.type}"]`);
+                    if(radio) radio.checked = true;
+                }
+            }
+            document.getElementById('dialog-wishlist').showModal();
+        },
+        openMustBuyModal(id=null) {
+            const form = document.querySelector('#dialog-mustbuy form');
+            form.reset();
+            document.getElementById('mb-id').value = '';
+            document.getElementById('mb-image').value = '';
+
+            if(id) {
+                const item = cachedMustBuy.find(i => i.id === id);
+                if(item) {
+                    document.getElementById('mb-id').value = item.id;
+                    document.getElementById('mb-category').value = item.category || '';
+                    document.getElementById('mb-name').value = item.name;
+                    document.getElementById('mb-details').value = item.details || '';
+                }
+            }
+            document.getElementById('dialog-mustbuy').showModal();
+        },
+        openCalculator() { document.getElementById('dialog-calculator').showModal(); },
+        
+        async saveMemo() { 
+            const id = document.getElementById('memo-id').value;
+            const title = document.getElementById('memo-title').value;
+            const content = document.getElementById('memo-content').value;
+            if(!title) return;
+            try { 
+                if(id) {
+                    await updateDoc(uiApp.getDocRef('memos', id), { title, content });
+                } else {
+                    await addDoc(uiApp.getCol('memos'), { title, content, createdAt: serverTimestamp() }); 
+                }
+                document.getElementById('dialog-memo').close();
+            } catch(e) { console.error(e); uiApp.showCustomAlert("儲存失敗"); } 
+        },
+        async togglePack(id, state) { try { await updateDoc(uiApp.getDocRef('packing', id), {checked: state}); } catch(e) { console.error(e); } },
+        async toggleMustBuy(id, state) { try { await updateDoc(uiApp.getDocRef('mustbuy', id), {checked: state}); } catch(e) { console.error(e); } },
+        
+        async delDoc(col, id) { 
+            try { await deleteDoc(uiApp.getDocRef(col, id)); } 
+            catch(e) { console.error(e); uiApp.showCustomAlert("刪除失敗"); } 
+        },
+        async deleteItinerary() { 
+            const id = document.getElementById('itin-id').value; 
+            try { 
+                await deleteDoc(uiApp.getDocRef('itinerary', id)); 
+                document.getElementById('dialog-itinerary').close(); 
+            } catch(e) { console.error(e); uiApp.showCustomAlert("刪除失敗"); } 
+        },
+        
+        async updateItineraryOrder() {
+            const list = document.getElementById('timeline-sortable');
+            const items = list.querySelectorAll('.timeline-item');
+            const batch = writeBatch(db);
+            
+            items.forEach((el, index) => {
+                const id = el.getAttribute('data-id');
+                const ref = uiApp.getDocRef('itinerary', id);
+                batch.update(ref, { order: index });
+            });
+            try { await batch.commit(); } catch(e) { console.error('Order update failed', e); }
+        },
+
+        toggleCurrency() {
+            this.calcMode = this.calcMode === 'JPY_TWD' ? 'TWD_JPY' : 'JPY_TWD';
+            document.getElementById('calc-mode-text').innerText = this.calcMode === 'JPY_TWD' ? 'JPY → TWD' : 'TWD → JPY';
+            this.updateCalc();
+        },
+        calcAppend(n) { 
+            if("+-*/".includes(n)) {
+                if("+-*/".includes(calcVal.slice(-1))) calcVal = calcVal.slice(0, -1);
+            }
+            if(calcVal === '0' && n !== '.') calcVal = '';
+            calcVal += n; 
+            this.updateCalc(); 
+        },
+        calcDel() { calcVal=calcVal.slice(0,-1)||'0'; this.updateCalc(); },
+        calcClear() { calcVal='0'; this.updateCalc(); },
+        calcEval() {
+             try {
+                 const res = new Function('return ' + calcVal)();
+                 calcVal = String(Math.round(res * 100) / 100); 
+                 this.updateCalc();
+             } catch(e) {
+                 calcVal = 'Error';
+                 setTimeout(() => { calcVal = '0'; this.updateCalc(); }, 1000);
+             }
+        },
+        updateCalc() { 
+            document.getElementById('calc-display').value = calcVal;
+            try {
+                let val = 0;
+                if(calcVal && !"+-*/".includes(calcVal.slice(-1))) {
+                    val = new Function('return ' + calcVal)();
+                }
+                let res = 0;
+                if (this.calcMode === 'JPY_TWD') res = Math.round(val * currentRate);
+                else res = Math.round(val / currentRate);
+                document.getElementById('calc-res').innerText = res.toLocaleString(); 
+            } catch(e) {
+                document.getElementById('calc-res').innerText = '...';
+            }
+        },
+        
+        async saveItinerary(e) {
+            e.preventDefault();
+            const id = document.getElementById('itin-id').value;
+            const cat = document.getElementById('itin-cat').value;
+            
+            const data = { 
+                date: document.getElementById('itin-date').value, 
+                time: document.getElementById('itin-time').value, 
+                endTime: document.getElementById('itin-end-time').value,
+                cat: cat, 
+                title: document.getElementById('itin-title').value, 
+                note: document.getElementById('itin-note').value, 
+                map: document.getElementById('itin-map').value,
+                kidInfo: {
+                    stroller: document.getElementById('kid-stroller').checked,
+                    nursing: document.getElementById('kid-nursing').checked,
+                    rating: document.getElementById('kid-rating').value,
+                    notes: document.getElementById('kid-notes').value
+                }
+            };
+
+            if(cat === '航班') {
+                data.depCode = document.getElementById('itin-dep-code').value.toUpperCase();
+                data.arrCode = document.getElementById('itin-arr-code').value.toUpperCase();
+            } else { data.depCode = null; data.arrCode = null; }
+
+            if(cat === '住宿') {
+                data.nights = parseInt(document.getElementById('itin-nights').value) || 1;
+            } else { data.nights = null; }
+
+            try {
+                if(id) {
+                    await updateDoc(uiApp.getDocRef('itinerary', id), data);
+                } else { 
+                    if(cat === '住宿' && data.nights > 1) {
+                         const batch = writeBatch(db);
+                         const startDate = new Date(data.date);
+                         for(let i=0; i<data.nights; i++) {
+                             const newDate = new Date(startDate);
+                             newDate.setDate(startDate.getDate() + i);
+                             const dateStr = newDate.toISOString().split('T')[0];
+                             const newData = {...data, date: dateStr, nights: 1, createdAt: serverTimestamp(), order: 999};
+                             const ref = doc(uiApp.getCol('itinerary'));
+                             batch.set(ref, newData);
+                         }
+                         await batch.commit();
+                    } else {
+                         data.order = cachedItinerary.filter(i => i.date === data.date).length;
+                         data.createdAt = serverTimestamp(); 
+                         await addDoc(uiApp.getCol('itinerary'), data);
+                    }
+                }
+                document.getElementById('dialog-itinerary').close();
+                activeDate = data.date;
+            } catch(e) { console.error(e); uiApp.showCustomAlert("儲存失敗"); }
+        },
+        async savePacking(e) { 
+            e.preventDefault(); 
+            const cat = document.querySelector('input[name="pack-cat-radio"]:checked').value;
+            try { 
+                await addDoc(uiApp.getCol('packing'), { 
+                    name: document.getElementById('pack-name').value, 
+                    category: cat, 
+                    checked: false, createdAt: serverTimestamp() 
+                });
+                document.getElementById('pack-name').value=''; 
+                document.getElementById('dialog-packing').close(); 
+            } catch(e) { console.error(e); uiApp.showCustomAlert("新增失敗"); } 
+        },
+        async saveWishlist(e) {
+            e.preventDefault();
+            const id = document.getElementById('wish-id').value;
+            const type = document.querySelector('input[name="wish-type"]:checked').value;
+            const fileInput = document.getElementById('wish-image');
+            
+            const data = { 
+                location: document.getElementById('wish-location').value,
+                name: document.getElementById('wish-item').value,
+                link: document.getElementById('wish-link').value,
+                type: type
+            };
+
+            if (fileInput.files.length > 0) {
+                try {
+                    const base64Img = await compressImage(fileInput.files[0]);
+                    data.image = base64Img;
+                } catch (err) { return; }
+            }
+
+            try {
+                if(id) { await updateDoc(uiApp.getDocRef('wishlist', id), data); } 
+                else { data.createdAt = serverTimestamp(); await addDoc(uiApp.getCol('wishlist'), data); }
+                e.target.reset();
+                document.getElementById('dialog-wishlist').close();
+            } catch(e) { console.error(e); uiApp.showCustomAlert("儲存失敗"); }
+        },
+        async saveMustBuy(e) { 
+            e.preventDefault(); 
+            const id = document.getElementById('mb-id').value;
+            const fileInput = document.getElementById('mb-image');
+
+            const data = { 
+                category: document.getElementById('mb-category').value,
+                name: document.getElementById('mb-name').value, 
+                details: document.getElementById('mb-details').value
+            };
+
+            if (fileInput.files.length > 0) {
+                try {
+                    const base64Img = await compressImage(fileInput.files[0]);
+                    data.image = base64Img;
+                } catch (err) { return; }
+            }
+
+            try { 
+                if(id) { await updateDoc(uiApp.getDocRef('mustbuy', id), data); } 
+                else { data.checked = false; data.createdAt = serverTimestamp(); await addDoc(uiApp.getCol('mustbuy'), data); }
+                e.target.reset(); 
+                document.getElementById('dialog-mustbuy').close(); 
+            } catch(e) { console.error(e); uiApp.showCustomAlert("儲存失敗"); } 
+        },
+        async updateRate() { try { const res=await fetch('https://api.exchangerate-api.com/v4/latest/JPY'); const d=await res.json(); currentRate=d.rates.TWD; uiApp.updateCalc(); } catch(e){} }
+    };
+    
+    window.app = uiApp;
+
+    window.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('dialog-calculator').addEventListener('close', () => { 
+            const view = document.querySelector('.active-view').id; 
+            if(view !== 'view-home') document.getElementById('fab-calc').style.display = 'flex'; 
+        });
+        
+        const initAuth = async () => { await signInAnonymously(auth); };
+        initAuth().catch(console.error);
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) { uiApp.init(user); } 
+        });
+    });
+</script>
+</body>
+</html>
