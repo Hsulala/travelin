@@ -33,10 +33,7 @@
         body { 
             font-family: 'Fredoka', sans-serif;
             background-color: var(--snoopy-yellow); 
-            /* 漫畫風格的點點背景 */
-            background-image: radial-gradient(var(--snoopy-white) 15%, transparent 16%), radial-gradient(var(--snoopy-white) 15%, transparent 16%);
-            background-size: 20px 20px;
-            background-position: 0 0, 10px 10px;
+            /* 移除點點背景，改為純色，避免視覺像破圖 */
             color: var(--snoopy-black);
             padding-bottom: env(safe-area-inset-bottom);
             -webkit-tap-highlight-color: transparent;
@@ -1196,14 +1193,7 @@
         },
 
         startSlideshow() { 
-            let i = 0; 
-            const el = document.getElementById('pet-frame'); 
-            el.style.backgroundImage = `url(${kidPhotos[0]})`;
-            
-            setInterval(() => { 
-                i = (i + 1) % kidPhotos.length;
-                el.style.backgroundImage = `url(${kidPhotos[i]})`; 
-            }, 5000); 
+            // Snoopy gif loop removed, as it's just a single static GIF now
         },
         
         openItineraryModal(id=null) {
