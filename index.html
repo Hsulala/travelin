@@ -652,7 +652,7 @@
     let currentTripId = localStorage.getItem('currentTripId') || DEFAULT_TRIP_ID;
     
     let userId = null;
-    let activeDate = '2025-12-14';
+    let activeDate = '2025-01-19'; // 修正: 將預設開啟日期改為 1/19
     let cachedItinerary = [];
     let cachedWishlist = [];
     let cachedMustBuy = [];
@@ -867,7 +867,8 @@
                     allDates.push(d.toISOString().split('T')[0]);
                 }
             } else {
-                allDates.push(new Date().toISOString().split('T')[0]);
+                // 修正: 如果沒有行程，預設顯示 1/19，而不是當天日期
+                allDates.push('2025-01-19');
             }
             
             let tabsHtml = `<div onclick="window.app.switchDate('0')" class="date-tab ${activeDate==='0'?'active':''}"><span class="day-label">ALL</span><span class="date-num">★</span></div>`;
