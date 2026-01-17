@@ -901,18 +901,17 @@
                 const dateObj = new Date(activeDate);
                 
                 // 顯示日期與星期 (英文格式)
-                const dayName = dateObj.toLocaleDateString('en-US', {weekday: 'short'}).toUpperCase();
-                const month = dateObj.getMonth() + 1;
-                const day = dateObj.getDate();
-                headerDate.innerText = `${month}/${day} ${dayName}`;
+                const dayName = dateObj.toLocaleDateString('en-US', {weekday: 'long'}).toUpperCase();
+                headerDate.innerText = dayName;
                 
+                // 修正: 座標改為名古屋
                 uiApp.fetchWeather(activeDate, (wCode, temp) => {
                     let iconName = 'cloud';
                     if (wCode <= 1) iconName = 'sun';
                     else if (wCode <= 3) iconName = 'cloud-sun';
                     else if (wCode <= 67) iconName = 'cloud-rain';
                     else if (wCode >= 95) iconName = 'cloud-lightning';
-                    headerWeather.innerHTML = `<i data-lucide="${iconName}" class="w-6 h-6 mr-2 text-blue-500"></i><span>${temp}</span>`;
+                    headerWeather.innerHTML = `<i data-lucide="${iconName}" class="w-8 h-8 mr-2 text-blue-500"></i><span class="text-3xl">${temp}</span>`;
                     if(window.lucide) window.lucide.createIcons();
                 });
 
@@ -1023,7 +1022,7 @@
             if(window.lucide) window.lucide.createIcons();
         },
         switchDate(d) { activeDate = d; uiApp.renderItinerary(); },
-        async fetchWeather(dateStr, cb) { try { const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=35.6895&longitude=139.6917&daily=weathercode,temperature_2m_max&timezone=Asia%2FTokyo&start_date=${dateStr}&end_date=${dateStr}`); const data = await res.json(); const code = data.daily.weathercode[0]; const temp = data.daily.temperature_2m_max[0]; cb(code, `${Math.round(temp)}°C`); } catch(e) { cb(0, ''); } },
+        async fetchWeather(dateStr, cb) { try { const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=35.1815&longitude=136.9066&daily=weathercode,temperature_2m_max&timezone=Asia%2FTokyo&start_date=${dateStr}&end_date=${dateStr}`); const data = await res.json(); const code = data.daily.weathercode[0]; const temp = data.daily.temperature_2m_max[0]; cb(code, `${Math.round(temp)}°C`); } catch(e) { cb(0, '--°C'); } },
         
         renderMemo(items) {
             const list = document.getElementById('list-memo');
@@ -1110,6 +1109,15 @@
                             const hasImage = i.image && i.image.startsWith('data:image');
                             const detailId = `wish-detail-${i.id}`;
 
+                            let displayLink = '';
+                            if (i.link) {
+                                if (i.link.startsWith('http')) {
+                                    displayLink = `<a href="${i.link}" target="_blank" class="text-xs text-blue-500 font-bold truncate underline block" onclick="event.stopPropagation()">${i.link}</a>`;
+                                } else {
+                                    displayLink = `<div class="text-xs text-gray-500 font-bold truncate">${i.link}</div>`;
+                                }
+                            }
+
                             return `
                             <div class="bg-gray-50 p-3 rounded-xl border-2 border-gray-200 cursor-pointer hover:bg-white hover:border-black transition-all group" onclick="document.getElementById('${detailId}') && document.getElementById('${detailId}').classList.toggle('hidden')">
                                 <div class="flex justify-between items-center">
@@ -1122,7 +1130,7 @@
                                                 <span class="font-bold text-black truncate text-lg">${i.name}</span>
                                                 ${mapLink}
                                             </div>
-                                            ${(i.link) ? `<div class="text-xs text-gray-500 font-bold truncate">${i.link}</div>` : ''}
+                                            ${displayLink}
                                         </div>
                                     </div>
                                     <div class="flex-shrink-0 flex items-center">
