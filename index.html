@@ -10,9 +10,10 @@
     <meta name="theme-color" content="#fcd34d">
     <meta name="apple-mobile-web-app-title" content="SnoopyTrip">
 
-    <!-- 自動生成 Snoopy 風格狗屋圖示 (黃底紅屋) -->
-    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%23fcd34d'/%3E%3Cpath d='M136 256h240v160H136z' fill='%23ef4444' stroke='%231c1917' stroke-width='24'/%3E%3Cpath d='M100 256L256 120l156 136' fill='none' stroke='%231c1917' stroke-width='24' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%23fcd34d'/%3E%3Cpath d='M136 256h240v160H136z' fill='%23ef4444' stroke='%231c1917' stroke-width='24'/%3E%3Cpath d='M100 256L256 120l156 136' fill='none' stroke='%231c1917' stroke-width='24' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+    <!-- 修正: iOS 主畫面圖示必須是 PNG 格式，不能是 SVG -->
+    <!-- 使用穩定的 Snoopy PNG 圖片連結 -->
+    <link rel="apple-touch-icon" href="https://upload.wikimedia.org/wikipedia/en/5/53/Snoopy_Peanuts.png">
+    <link rel="icon" type="image/png" href="https://upload.wikimedia.org/wikipedia/en/5/53/Snoopy_Peanuts.png">
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -1115,10 +1116,12 @@
 
                             let displayLink = '';
                             if (i.link) {
-                                if (i.link.startsWith('http')) {
-                                    displayLink = `<a href="${i.link}" target="_blank" class="text-xs text-blue-500 font-bold truncate underline block" onclick="event.stopPropagation()">${i.link}</a>`;
+                                // 修正: 自動去除空白再判斷，確保網址能正確顯示
+                                const cleanLink = i.link.trim();
+                                if (cleanLink.startsWith('http')) {
+                                    displayLink = `<a href="${cleanLink}" target="_blank" class="text-xs text-blue-500 font-bold truncate underline block mt-1" onclick="event.stopPropagation()">${cleanLink}</a>`;
                                 } else {
-                                    displayLink = `<div class="text-xs text-gray-500 font-bold truncate">${i.link}</div>`;
+                                    displayLink = `<div class="text-xs text-gray-500 font-bold truncate mt-1">${cleanLink}</div>`;
                                 }
                             }
 
@@ -1129,15 +1132,17 @@
                                         <div class="w-9 h-9 rounded-xl flex-shrink-0 flex items-center justify-center border-2 border-black ${i.type==='eat'?'bg-orange-100 text-orange-600':'bg-blue-100 text-blue-600'}">
                                             <i data-lucide="${i.type==='eat'?'utensils':'shopping-bag'}" class="w-5 h-5"></i>
                                         </div>
-                                        <div class="flex flex-col overflow-hidden">
-                                            <div class="flex items-center">
-                                                <span class="font-bold text-black truncate text-lg">${i.name}</span>
-                                                ${mapLink}
+                                        <div class="flex flex-col overflow-hidden w-full">
+                                            <div class="flex items-center justify-between">
+                                                <div class="flex items-center overflow-hidden">
+                                                    <span class="font-bold text-black truncate text-lg">${i.name}</span>
+                                                    ${mapLink}
+                                                </div>
                                             </div>
                                             ${displayLink}
                                         </div>
                                     </div>
-                                    <div class="flex-shrink-0 flex items-center">
+                                    <div class="flex-shrink-0 flex items-center ml-2">
                                         ${hasImage ? `<i data-lucide="image" class="w-4 h-4 text-gray-400 mr-2"></i>` : ''}
                                         <button onclick="event.stopPropagation(); window.app.openWishlistModal('${i.id}')" class="text-gray-300 hover:text-black p-2"><i data-lucide="pencil" class="w-4 h-4"></i></button>
                                         <button onclick="event.stopPropagation(); window.app.delDoc('wishlist', '${i.id}')" class="text-gray-300 hover:text-red-500 p-2"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
