@@ -8,6 +8,11 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#fcd34d">
+    <meta name="apple-mobile-web-app-title" content="SnoopyTrip">
+
+    <!-- 自動生成 Snoopy 風格狗屋圖示 (黃底紅屋) -->
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%23fcd34d'/%3E%3Cpath d='M136 256h240v160H136z' fill='%23ef4444' stroke='%231c1917' stroke-width='24'/%3E%3Cpath d='M100 256L256 120l156 136' fill='none' stroke='%231c1917' stroke-width='24' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%23fcd34d'/%3E%3Cpath d='M136 256h240v160H136z' fill='%23ef4444' stroke='%231c1917' stroke-width='24'/%3E%3Cpath d='M100 256L256 120l156 136' fill='none' stroke='%231c1917' stroke-width='24' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -33,7 +38,6 @@
         body { 
             font-family: 'Fredoka', sans-serif;
             background-color: var(--snoopy-yellow); 
-            /* 移除點點背景，改為純色，避免視覺像破圖 */
             color: var(--snoopy-black);
             padding-bottom: env(safe-area-inset-bottom);
             -webkit-tap-highlight-color: transparent;
@@ -116,6 +120,7 @@
         dialog { border-radius: 24px; border: 4px solid var(--snoopy-black); padding: 0; background: #fff; width: 90%; max-width: 400px; z-index: 100; box-shadow: 8px 8px 0px rgba(0,0,0,0.2); }
         dialog::backdrop { background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(2px); z-index: 99; }
         
+        /* Updated Calculator Styles: White & Black Theme */
         .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
         .calc-btn { 
             height: 60px; border-radius: 16px; background: white; color: var(--snoopy-black); 
@@ -124,7 +129,7 @@
             transition: all 0.1s; cursor: pointer;
         }
         .calc-btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--snoopy-black); }
-        .calc-btn-op { background: var(--snoopy-yellow); }
+        .calc-btn-op { background: #f3f4f6; color: var(--snoopy-black); } /* Light Gray */
         .calc-btn-eq { background: var(--snoopy-black); color: white; border-color: var(--snoopy-black); }
 
         /* Child Friendly Badge */
@@ -223,15 +228,14 @@
         </div>
     </div>
 
-    <!-- 1. 行程 -->
+    <!-- 1. 行程 (ITINERARY) -->
     <div id="view-itinerary" class="hidden-view">
         <div class="sticky-header-safe header-bar">
             <button onclick="window.app.goHome()" class="back-btn"><i data-lucide="arrow-left" class="w-6 h-6"></i></button>
             <h2 class="font-black text-3xl tracking-tight text-black">ITINERARY</h2>
             <div class="flex gap-2">
-                 <!-- 導覽到 Wishlist -->
+                 <!-- 請求: 行程頁 -> 許願 & 必買 -->
                  <button onclick="window.app.switchView('wishlist')" class="w-11 h-11 flex items-center justify-center rounded-full border-3 border-black bg-white shadow-[2px_2px_0px_#000] active:translate-y-1 active:shadow-none transition-all"><i data-lucide="heart" class="w-5 h-5 text-red-500"></i></button>
-                 <!-- 導覽到 Mustbuy (新增) -->
                  <button onclick="window.app.switchView('mustbuy')" class="w-11 h-11 flex items-center justify-center rounded-full border-3 border-black bg-white shadow-[2px_2px_0px_#000] active:translate-y-1 active:shadow-none transition-all"><i data-lucide="shopping-bag" class="w-5 h-5 text-orange-500"></i></button>
             </div>
         </div>
@@ -253,18 +257,21 @@
         <div id="section-itinerary" class="pt-2">
             <div id="list-itinerary" class="pl-2 relative space-y-6 min-h-[200px]"></div>
             <div id="btn-itin-add-container" class="flow-btn-container mt-8 pb-8">
-                 <button onclick="window.app.openItineraryModal()" class="big-action-btn btn-yellow"><i data-lucide="plus-circle" class="w-6 h-6"></i> 新增行程</button>
+                 <button onclick="window.app.openItineraryModal()" class="big-action-btn btn-red shadow-[4px_4px_0px_#000] border-black"><i data-lucide="plus-circle" class="w-6 h-6"></i> 新增行程</button>
             </div>
         </div>
     </div>
 
-    <!-- 2. 行李 (Packing) -->
+    <!-- 2. 行李 (PACKING) -->
     <div id="view-packing" class="hidden-view">
         <div class="sticky-header-safe header-bar">
             <button onclick="window.app.goHome()" class="back-btn"><i data-lucide="arrow-left" class="w-6 h-6"></i></button>
             <h2 class="font-black text-3xl tracking-tight text-black">PACKING</h2>
-            <!-- 導覽回到 Itinerary (完成循環) -->
-            <button onclick="window.app.switchView('itinerary')" class="w-11 h-11 flex items-center justify-center rounded-full border-3 border-black bg-white shadow-[2px_2px_0px_#000] active:translate-y-1 active:shadow-none transition-all"><i data-lucide="map" class="w-5 h-5 text-black"></i></button>
+            <div class="flex gap-2">
+                <!-- 請求: 行李頁 -> 行程 & 必買 -->
+                <button onclick="window.app.switchView('itinerary')" class="w-11 h-11 flex items-center justify-center rounded-full border-3 border-black bg-white shadow-[2px_2px_0px_#000] active:translate-y-1 active:shadow-none transition-all"><i data-lucide="map" class="w-5 h-5 text-black"></i></button>
+                <button onclick="window.app.switchView('mustbuy')" class="w-11 h-11 flex items-center justify-center rounded-full border-3 border-black bg-white shadow-[2px_2px_0px_#000] active:translate-y-1 active:shadow-none transition-all"><i data-lucide="shopping-bag" class="w-5 h-5 text-orange-500"></i></button>
+            </div>
         </div>
         
         <!-- Import Default Button -->
@@ -277,42 +284,48 @@
         <div id="packing-container" class="space-y-6 pb-24"></div>
         
         <div class="fixed bottom-6 left-0 right-0 px-4 flex justify-center">
-             <button onclick="document.getElementById('dialog-packing').showModal()" class="big-action-btn btn-blue w-full max-w-[400px]"><i data-lucide="package-plus" class="w-6 h-6"></i> 加東西</button>
+             <button onclick="document.getElementById('dialog-packing').showModal()" class="big-action-btn btn-blue w-full max-w-[400px] border-black shadow-[4px_4px_0px_#000]"><i data-lucide="package-plus" class="w-6 h-6"></i> 加東西</button>
         </div>
     </div>
 
-    <!-- 3. 慾望清單 (Wishlist) -->
+    <!-- 3. 慾望清單 (WISHLIST) -->
     <div id="view-wishlist" class="hidden-view">
         <div class="sticky-header-safe header-bar">
             <button onclick="window.app.goHome()" class="back-btn"><i data-lucide="arrow-left" class="w-6 h-6"></i></button>
             <h2 class="font-black text-3xl tracking-tight text-black">WISHLIST</h2>
-            <!-- 導覽到 Must Buy -->
-            <button onclick="window.app.switchView('mustbuy')" class="w-11 h-11 flex items-center justify-center rounded-full border-3 border-black bg-white shadow-[2px_2px_0px_#000] active:translate-y-1 active:shadow-none transition-all"><i data-lucide="shopping-bag" class="w-5 h-5 text-orange-500"></i></button>
+            <div class="flex gap-2">
+                <!-- 請求: 許願頁 -> 行程 & 必買 -->
+                <button onclick="window.app.switchView('itinerary')" class="w-11 h-11 flex items-center justify-center rounded-full border-3 border-black bg-white shadow-[2px_2px_0px_#000] active:translate-y-1 active:shadow-none transition-all"><i data-lucide="map" class="w-5 h-5 text-black"></i></button>
+                <button onclick="window.app.switchView('mustbuy')" class="w-11 h-11 flex items-center justify-center rounded-full border-3 border-black bg-white shadow-[2px_2px_0px_#000] active:translate-y-1 active:shadow-none transition-all"><i data-lucide="shopping-bag" class="w-5 h-5 text-orange-500"></i></button>
+            </div>
         </div>
         <div id="list-wishlist" class="space-y-6 mt-4 pb-24"></div>
         <div class="fixed bottom-6 left-0 right-0 px-4 flex justify-center">
-             <button onclick="window.app.openWishlistModal()" class="big-action-btn btn-red w-full max-w-[400px]"><i data-lucide="heart-handshake" class="w-6 h-6"></i> 許願！</button>
+             <button onclick="window.app.openWishlistModal()" class="big-action-btn bg-pink-400 text-white w-full max-w-[400px] border-black shadow-[4px_4px_0px_#000]"><i data-lucide="heart-handshake" class="w-6 h-6"></i> 許願！</button>
         </div>
     </div>
 
-    <!-- 4. 必買清單 (Must Buy) -->
+    <!-- 4. 必買清單 (MUST BUY) -->
     <div id="view-mustbuy" class="hidden-view">
         <div class="sticky-header-safe header-bar">
             <button onclick="window.app.goHome()" class="back-btn"><i data-lucide="arrow-left" class="w-6 h-6"></i></button>
             <h2 class="font-black text-3xl tracking-tight text-black">MUST BUY</h2>
-            <!-- 導覽到 Packing -->
-            <button onclick="window.app.switchView('packing')" class="w-11 h-11 flex items-center justify-center rounded-full border-3 border-black bg-white shadow-[2px_2px_0px_#000] active:translate-y-1 active:shadow-none transition-all"><i data-lucide="luggage" class="w-5 h-5 text-blue-500"></i></button>
+            <div class="flex gap-2">
+                <!-- 請求: 必買頁 -> 行程 & 許願 -->
+                <button onclick="window.app.switchView('itinerary')" class="w-11 h-11 flex items-center justify-center rounded-full border-3 border-black bg-white shadow-[2px_2px_0px_#000] active:translate-y-1 active:shadow-none transition-all"><i data-lucide="map" class="w-5 h-5 text-black"></i></button>
+                <button onclick="window.app.switchView('wishlist')" class="w-11 h-11 flex items-center justify-center rounded-full border-3 border-black bg-white shadow-[2px_2px_0px_#000] active:translate-y-1 active:shadow-none transition-all"><i data-lucide="heart" class="w-5 h-5 text-red-500"></i></button>
+            </div>
         </div>
         <div id="mustbuy-container" class="space-y-6 mt-4 pb-24"></div>
         <div class="fixed bottom-6 left-0 right-0 px-4 flex justify-center">
-             <button onclick="window.app.openMustBuyModal()" class="big-action-btn btn-yellow w-full max-w-[400px]"><i data-lucide="shopping-cart" class="w-6 h-6"></i> 新增必買</button>
+             <button onclick="window.app.openMustBuyModal()" class="big-action-btn btn-blue w-full max-w-[400px] border-black shadow-[4px_4px_0px_#000]"><i data-lucide="shopping-cart" class="w-6 h-6"></i> 新增必買</button>
         </div>
     </div>
 
 </div>
 
 <!-- FAB -->
-<button id="fab-calc" onclick="window.app && window.app.openCalculator()" class="fixed bottom-24 right-5 w-16 h-16 rounded-full bg-yellow-400 border-4 border-black shadow-[4px_4px_0px_#000] z-50 flex items-center justify-center hidden active:scale-90 transition-transform">
+<button id="fab-calc" onclick="window.app && window.app.openCalculator()" class="fixed bottom-24 right-5 w-16 h-16 rounded-full bg-white border-4 border-black shadow-[4px_4px_0px_#000] z-50 flex items-center justify-center hidden active:scale-90 transition-transform">
     <i data-lucide="calculator" class="w-8 h-8 text-black"></i>
 </button>
 
@@ -356,17 +369,17 @@
     </div>
 </dialog>
 
-<!-- 計算機 -->
+<!-- 計算機 (White Theme) -->
 <dialog id="dialog-calculator">
-    <div class="p-4 bg-yellow-50">
+    <div class="p-4 bg-white">
         <div class="flex justify-between items-center mb-4">
-            <div class="text-xs font-black text-black uppercase tracking-widest bg-yellow-300 px-2 py-1 rounded border-2 border-black">Calculator</div>
+            <div class="text-xs font-black text-white uppercase tracking-widest bg-black px-2 py-1 rounded border-2 border-black">Calculator</div>
             <button type="button" onclick="document.getElementById('dialog-calculator').close()" class="p-1 bg-white border-2 border-black rounded-full active:bg-gray-100"><i data-lucide="x" class="w-5 h-5 text-black"></i></button>
         </div>
         
-        <div class="bg-white rounded-xl px-3 py-4 mb-4 text-right border-3 border-black shadow-[3px_3px_0px_rgba(0,0,0,0.1)]">
+        <div class="bg-gray-100 rounded-xl px-3 py-4 mb-4 text-right border-3 border-black shadow-inner">
             <input type="text" id="calc-display" class="bg-transparent text-4xl font-black text-right outline-none text-black tracking-tighter w-full mb-1" placeholder="0" readonly>
-            <div class="text-orange-600 font-bold text-lg border-t-2 border-dashed border-gray-200 pt-2 flex justify-end items-center gap-2">
+            <div class="text-orange-600 font-bold text-lg border-t-2 border-dashed border-gray-300 pt-2 flex justify-end items-center gap-2">
                 <span class="text-[10px] bg-orange-100 text-orange-700 px-1 rounded border border-orange-200">≈ TWD</span>
                 <span id="calc-res">0</span>
             </div>
@@ -404,12 +417,11 @@
     </div>
 </dialog>
 
-<!-- 行程編輯彈窗 (修正樣式) -->
+<!-- 行程編輯彈窗 (Red Theme) -->
 <dialog id="dialog-itinerary">
-    <!-- 修正: 移除 h-full, 改為 w-full, 這樣高度會由內容決定，不會塌陷 -->
     <div class="p-5 relative bg-white w-full overflow-y-auto max-h-[85vh]">
-        <div class="flex justify-between items-center mb-6 sticky top-0 bg-white z-10 py-2 border-b-2 border-gray-100">
-            <h3 class="font-black text-xl text-black uppercase">Edit Plan</h3>
+        <div class="flex justify-between items-center mb-6 sticky top-0 bg-white z-10 py-2 border-b-2 border-red-100">
+            <h3 class="font-black text-xl text-red-500 uppercase">Edit Plan</h3>
             <div class="flex gap-2">
                  <button type="button" onclick="window.app.deleteItinerary()" id="btn-del-itin" class="hidden p-2 bg-red-100 text-red-500 rounded-full border-2 border-red-200"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
                  <button type="button" onclick="document.getElementById('dialog-itinerary').close()" class="p-2 bg-gray-100 rounded-full border-2 border-black"><i data-lucide="x" class="w-5 h-5"></i></button>
@@ -418,28 +430,25 @@
         <form id="form-itinerary" onsubmit="window.app.saveItinerary(event)" class="space-y-4 pb-4">
             <input type="hidden" id="itin-id">
             
-            <!-- 名稱與地圖 -->
             <div class="space-y-2">
-                <input type="text" id="itin-title" placeholder="地點 / 行程名稱" class="w-full bg-white p-4 rounded-xl font-black text-xl outline-none border-3 border-black focus:bg-yellow-50" required oninput="window.app.updateGoogleBtn(this.value)">
+                <input type="text" id="itin-title" placeholder="地點 / 行程名稱" class="w-full bg-white p-4 rounded-xl font-black text-xl outline-none border-3 border-black focus:border-red-500 focus:bg-red-50 transition-colors" required oninput="window.app.updateGoogleBtn(this.value)">
                 
                 <div class="flex gap-2">
                     <div class="relative flex-grow">
                         <i data-lucide="map-pin" class="absolute left-3 top-3.5 w-4 h-4 text-gray-400"></i>
-                        <input type="text" id="itin-map" placeholder="Google Maps 連結" class="w-full bg-gray-50 p-3 pl-10 rounded-xl text-sm outline-none border-2 border-gray-200 focus:border-black font-bold text-blue-600">
+                        <input type="text" id="itin-map" placeholder="Google Maps 連結" class="w-full bg-gray-50 p-3 pl-10 rounded-xl text-sm outline-none border-2 border-gray-200 focus:border-red-500 font-bold text-blue-600">
                     </div>
-                    <!-- 親子查詢按鈕 -->
                     <a id="btn-check-kids" href="#" target="_blank" class="hidden bg-yellow-300 border-2 border-black rounded-xl px-3 flex items-center justify-center font-bold text-xs text-black shadow-sm active:translate-y-1">
                         <i data-lucide="search" class="w-3 h-3 mr-1"></i> 查親子
                     </a>
                 </div>
             </div>
 
-            <!-- 時間與日期 -->
-            <div class="bg-gray-50 p-3 rounded-xl border-2 border-gray-200">
-                <label class="text-[10px] font-bold text-gray-400 uppercase block mb-1">Date & Time</label>
+            <div class="bg-red-50 p-3 rounded-xl border-2 border-red-200">
+                <label class="text-[10px] font-bold text-red-400 uppercase block mb-1">Date & Time</label>
                 <div class="flex gap-2 mb-2">
-                    <input type="date" id="itin-date" class="flex-grow bg-white p-2 rounded-lg font-bold text-black outline-none border-2 border-gray-200" required>
-                    <select id="itin-cat" onchange="window.app.onCatChange(this.value)" class="w-24 bg-white p-2 rounded-lg font-bold outline-none border-2 border-gray-200">
+                    <input type="date" id="itin-date" class="flex-grow bg-white p-2 rounded-lg font-bold text-black outline-none border-2 border-red-100 focus:border-red-500" required>
+                    <select id="itin-cat" onchange="window.app.onCatChange(this.value)" class="w-24 bg-white p-2 rounded-lg font-bold outline-none border-2 border-red-100 focus:border-red-500">
                         <option value="景點">景點</option>
                         <option value="美食">美食</option>
                         <option value="購物">購物</option>
@@ -449,13 +458,12 @@
                     </select>
                 </div>
                 <div class="flex gap-2">
-                    <input type="time" id="itin-time" class="flex-1 bg-white p-2 rounded-lg font-bold outline-none border-2 border-gray-200 text-center">
-                    <span class="self-center font-bold text-gray-300">~</span>
-                    <input type="time" id="itin-end-time" class="flex-1 bg-white p-2 rounded-lg font-bold outline-none border-2 border-gray-200 text-center">
+                    <input type="time" id="itin-time" class="flex-1 bg-white p-2 rounded-lg font-bold outline-none border-2 border-red-100 focus:border-red-500 text-center">
+                    <span class="self-center font-bold text-red-300">~</span>
+                    <input type="time" id="itin-end-time" class="flex-1 bg-white p-2 rounded-lg font-bold outline-none border-2 border-red-100 focus:border-red-500 text-center">
                 </div>
             </div>
             
-            <!-- 航班/住宿特殊欄位 -->
             <div id="field-flight" class="hidden grid grid-cols-2 gap-3 bg-blue-50 p-3 rounded-xl border-2 border-blue-200">
                 <div>
                     <label class="text-[10px] font-bold text-blue-400 uppercase block mb-1">From</label>
@@ -474,7 +482,6 @@
                  </div>
             </div>
 
-            <!-- 親子友善紀錄區 -->
             <div class="bg-green-50 p-3 rounded-xl border-2 border-green-200 relative">
                 <div class="absolute -top-3 left-3 bg-green-500 text-white text-[10px] font-bold px-2 py-0.5 rounded border-2 border-green-700">FOR KIDS</div>
                 <div class="mt-2 space-y-2">
@@ -497,18 +504,18 @@
                 </div>
             </div>
 
-            <textarea id="itin-note" placeholder="一般備註..." class="w-full bg-gray-50 p-3 rounded-xl text-sm outline-none border-2 border-gray-200 focus:border-black h-20 resize-none font-medium"></textarea>
+            <textarea id="itin-note" placeholder="一般備註..." class="w-full bg-gray-50 p-3 rounded-xl text-sm outline-none border-2 border-gray-200 focus:border-red-500 h-20 resize-none font-medium"></textarea>
             
-            <button type="submit" class="w-full bg-black text-white font-black py-4 rounded-xl shadow-[4px_4px_0px_#fcd34d] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all border-3 border-black text-lg">SAVE PLAN</button>
+            <button type="submit" class="w-full bg-red-500 text-white font-black py-4 rounded-xl shadow-[4px_4px_0px_#000] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all border-3 border-black text-lg">SAVE PLAN</button>
         </form>
     </div>
 </dialog>
 
-<!-- Packing Modal -->
+<!-- Packing Modal (Green/Blue Theme) -->
 <dialog id="dialog-packing">
     <div class="p-5 bg-white rounded-3xl">
-         <div class="flex justify-between items-center mb-4">
-            <h3 class="font-black text-xl text-black">ADD ITEM</h3>
+         <div class="flex justify-between items-center mb-4 border-b-2 border-blue-100 pb-2">
+            <h3 class="font-black text-xl text-blue-500">ADD ITEM</h3>
             <button type="button" onclick="document.getElementById('dialog-packing').close()" class="p-2 bg-gray-100 rounded-full border-2 border-black"><i data-lucide="x" class="w-5 h-5"></i></button>
          </div>
          <form onsubmit="window.app.savePacking(event)" class="space-y-3">
@@ -531,28 +538,28 @@
                  </label>
              </div>
              
-             <input type="text" id="pack-name" placeholder="物品名稱" class="w-full bg-gray-50 p-4 rounded-xl font-bold outline-none border-3 border-black focus:bg-yellow-50" required>
-             <button type="submit" class="w-full bg-black text-white font-bold py-4 rounded-xl shadow-[4px_4px_0px_#60a5fa] active:shadow-none active:translate-y-[2px] border-3 border-black mt-2">ADD ITEM</button>
+             <input type="text" id="pack-name" placeholder="物品名稱" class="w-full bg-gray-50 p-4 rounded-xl font-bold outline-none border-3 border-black focus:border-blue-500 focus:bg-blue-50" required>
+             <button type="submit" class="w-full bg-blue-500 text-white font-bold py-4 rounded-xl shadow-[4px_4px_0px_#000] active:shadow-none active:translate-y-[2px] border-3 border-black mt-2">ADD ITEM</button>
          </form>
     </div>
 </dialog>
 
-<!-- Wishlist Modal -->
+<!-- Wishlist Modal (Pink Theme) -->
 <dialog id="dialog-wishlist">
     <div class="p-5 bg-white rounded-3xl">
-         <div class="flex justify-between items-center mb-4">
-            <h3 class="font-black text-xl text-black">WISH ITEM</h3>
+         <div class="flex justify-between items-center mb-4 border-b-2 border-pink-100 pb-2">
+            <h3 class="font-black text-xl text-pink-500">WISH ITEM</h3>
             <button type="button" onclick="document.getElementById('dialog-wishlist').close()" class="p-2 bg-gray-100 rounded-full border-2 border-black"><i data-lucide="x" class="w-5 h-5"></i></button>
          </div>
          <form onsubmit="window.app.saveWishlist(event)" class="space-y-3">
              <input type="hidden" id="wish-id">
-             <input type="text" id="wish-location" placeholder="地點 (如: 新宿, 表參道)" class="w-full bg-gray-50 p-4 rounded-xl font-bold outline-none border-3 border-black focus:bg-white" required>
-             <input type="text" id="wish-item" placeholder="許願項目" class="w-full bg-gray-50 p-4 rounded-xl font-bold outline-none border-3 border-black focus:bg-white" required>
+             <input type="text" id="wish-location" placeholder="地點 (如: 新宿, 表參道)" class="w-full bg-gray-50 p-4 rounded-xl font-bold outline-none border-3 border-black focus:border-pink-500 focus:bg-pink-50" required>
+             <input type="text" id="wish-item" placeholder="許願項目" class="w-full bg-gray-50 p-4 rounded-xl font-bold outline-none border-3 border-black focus:border-pink-500 focus:bg-pink-50" required>
              <div class="relative">
                 <i data-lucide="link" class="absolute left-3 top-3.5 w-4 h-4 text-gray-400"></i>
-                <input type="text" id="wish-link" placeholder="網址或備註" class="w-full bg-gray-50 p-3 pl-10 rounded-xl text-sm outline-none border-2 border-gray-200 focus:border-black font-bold">
+                <input type="text" id="wish-link" placeholder="網址或備註" class="w-full bg-gray-50 p-3 pl-10 rounded-xl text-sm outline-none border-2 border-gray-200 focus:border-pink-500 font-bold">
             </div>
-             <label class="flex items-center justify-center gap-2 w-full padding-3 p-3 border-2 dashed border-gray-300 rounded-xl cursor-pointer hover:bg-gray-50 font-bold text-gray-500">
+             <label class="flex items-center justify-center gap-2 w-full padding-3 p-3 border-2 dashed border-pink-300 rounded-xl cursor-pointer hover:bg-pink-50 font-bold text-pink-500">
                  <i data-lucide="camera" class="w-5 h-5"></i> 上傳圖片 (選填)
                  <input type="file" id="wish-image" accept="image/*" class="hidden">
              </label>
@@ -566,22 +573,22 @@
                      <span class="font-bold text-sm"><i data-lucide="shopping-bag" class="w-4 h-4 inline mr-1"></i> BUY</span>
                  </label>
              </div>
-             <button type="submit" class="w-full bg-black text-white font-bold py-4 rounded-xl shadow-[4px_4px_0px_#ef4444] active:shadow-none active:translate-y-[2px] border-3 border-black mt-2">SAVE WISH</button>
+             <button type="submit" class="w-full bg-pink-500 text-white font-bold py-4 rounded-xl shadow-[4px_4px_0px_#000] active:shadow-none active:translate-y-[2px] border-3 border-black mt-2">SAVE WISH</button>
          </form>
     </div>
 </dialog>
 
-<!-- Mustbuy Modal -->
+<!-- Mustbuy Modal (Blue Theme) -->
 <dialog id="dialog-mustbuy">
     <div class="p-5 bg-white rounded-3xl">
-         <div class="flex justify-between items-center mb-4">
-            <h3 class="font-black text-xl text-black">MUST BUY</h3>
+         <div class="flex justify-between items-center mb-4 border-b-2 border-blue-100 pb-2">
+            <h3 class="font-black text-xl text-blue-500">MUST BUY</h3>
             <button type="button" onclick="document.getElementById('dialog-mustbuy').close()" class="p-2 bg-gray-100 rounded-full border-2 border-black"><i data-lucide="x" class="w-5 h-5"></i></button>
          </div>
          <form onsubmit="window.app.saveMustBuy(event)" class="space-y-3">
              <input type="hidden" id="mb-id">
              <div class="relative">
-                 <input type="text" id="mb-category" list="mb-cat-list" placeholder="分類 (例: 送婆婆)" class="w-full bg-gray-50 p-4 rounded-xl font-bold outline-none border-3 border-black focus:bg-white" required>
+                 <input type="text" id="mb-category" list="mb-cat-list" placeholder="分類 (例: 送婆婆)" class="w-full bg-gray-50 p-4 rounded-xl font-bold outline-none border-3 border-black focus:border-blue-500 focus:bg-blue-50" required>
                  <datalist id="mb-cat-list">
                      <option value="自用/補貨"></option>
                      <option value="送家人/長輩"></option>
@@ -589,13 +596,13 @@
                      <option value="代購"></option>
                  </datalist>
              </div>
-             <input type="text" id="mb-name" placeholder="商品名稱" class="w-full bg-gray-50 p-4 rounded-xl font-bold outline-none border-3 border-black focus:bg-white" required>
-             <input type="text" id="mb-details" placeholder="備註/規格" class="w-full bg-gray-50 p-4 rounded-xl text-sm outline-none border-2 border-gray-200 focus:border-black">
-             <label class="flex items-center justify-center gap-2 w-full padding-3 p-3 border-2 dashed border-gray-300 rounded-xl cursor-pointer hover:bg-gray-50 font-bold text-gray-500">
+             <input type="text" id="mb-name" placeholder="商品名稱" class="w-full bg-gray-50 p-4 rounded-xl font-bold outline-none border-3 border-black focus:border-blue-500 focus:bg-blue-50" required>
+             <input type="text" id="mb-details" placeholder="備註/規格" class="w-full bg-gray-50 p-4 rounded-xl text-sm outline-none border-2 border-gray-200 focus:border-blue-500">
+             <label class="flex items-center justify-center gap-2 w-full padding-3 p-3 border-2 dashed border-blue-300 rounded-xl cursor-pointer hover:bg-blue-50 font-bold text-blue-500">
                  <i data-lucide="camera" class="w-5 h-5"></i> 上傳圖片 (選填)
                  <input type="file" id="mb-image" accept="image/*" class="hidden">
              </label>
-             <button type="submit" class="w-full bg-black text-white font-bold py-4 rounded-xl shadow-[4px_4px_0px_#fcd34d] active:shadow-none active:translate-y-[2px] border-3 border-black mt-2">SAVE ITEM</button>
+             <button type="submit" class="w-full bg-blue-500 text-white font-bold py-4 rounded-xl shadow-[4px_4px_0px_#000] active:shadow-none active:translate-y-[2px] border-3 border-black mt-2">SAVE ITEM</button>
          </form>
     </div>
 </dialog>
@@ -893,7 +900,11 @@
                 const items = cachedItinerary.filter(i => i.date === activeDate);
                 const dateObj = new Date(activeDate);
                 
-                headerDate.innerText = `${dateObj.toLocaleDateString('en-US', {weekday:'short'})} ${dateObj.getDate()}`;
+                // 顯示日期與星期 (英文格式)
+                const dayName = dateObj.toLocaleDateString('en-US', {weekday: 'short'}).toUpperCase();
+                const month = dateObj.getMonth() + 1;
+                const day = dateObj.getDate();
+                headerDate.innerText = `${month}/${day} ${dayName}`;
                 
                 uiApp.fetchWeather(activeDate, (wCode, temp) => {
                     let iconName = 'cloud';
