@@ -651,12 +651,12 @@
         db = getFirestore(fbApp);
     } catch (e) { console.error("Firebase init error", e); }
     
-    // 預設改為 NAGOYA
+    // 預設改為 NAGOYA, 2025 (Restore user's data access)
     const DEFAULT_TRIP_ID = "SNOOPY_NAGOYA_2025";
     let currentTripId = localStorage.getItem('currentTripId') || DEFAULT_TRIP_ID;
     
     let userId = null;
-    let activeDate = '2025-01-19'; // 修正: 將預設開啟日期改為 1/19
+    let activeDate = '2025-01-19'; // 修正: 改為 2025-01-19 to match data
     let cachedItinerary = [];
     let cachedWishlist = [];
     let cachedMustBuy = [];
@@ -712,7 +712,7 @@
             // 動態處理標題，移除 SNOOPY_, _2025 等字樣，只顯示地點
             let display = currentTripId.toUpperCase();
             // 簡單的清理邏輯，讓標題好看一點
-            display = display.replace('SNOOPY_', '').replace('_2025', '').replace('_2024', '').replace('_TRIP', '');
+            display = display.replace('SNOOPY_', '').replace('_2026', '').replace('_2025', '').replace('_2024', '').replace('_TRIP', '');
             if(display.includes('_')) display = display.split('_')[0];
             
             const titleEl = document.getElementById('home-title-text');
@@ -871,7 +871,7 @@
                     allDates.push(d.toISOString().split('T')[0]);
                 }
             } else {
-                // 修正: 如果沒有行程，預設顯示 1/19，而不是當天日期
+                // 修正: 預設顯示 2025-01-19 (match restored data)
                 allDates.push('2025-01-19');
             }
             
@@ -900,11 +900,11 @@
                 const items = cachedItinerary.filter(i => i.date === activeDate);
                 const dateObj = new Date(activeDate);
                 
-                // 顯示日期與星期 (英文格式)
+                // 修正: 標題只顯示星期 (e.g. SUNDAY)
                 const dayName = dateObj.toLocaleDateString('en-US', {weekday: 'long'}).toUpperCase();
                 headerDate.innerText = dayName;
                 
-                // 修正: 座標改為名古屋
+                // 修正: 座標改為名古屋 (35.18, 136.90)
                 uiApp.fetchWeather(activeDate, (wCode, temp) => {
                     let iconName = 'cloud';
                     if (wCode <= 1) iconName = 'sun';
@@ -1022,7 +1022,11 @@
             if(window.lucide) window.lucide.createIcons();
         },
         switchDate(d) { activeDate = d; uiApp.renderItinerary(); },
-        async fetchWeather(dateStr, cb) { try { const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=35.1815&longitude=136.9066&daily=weathercode,temperature_2m_max&timezone=Asia%2FTokyo&start_date=${dateStr}&end_date=${dateStr}`); const data = await res.json(); const code = data.daily.weathercode[0]; const temp = data.daily.temperature_2m_max[0]; cb(code, `${Math.round(temp)}°C`); } catch(e) { cb(0, '--°C'); } },
+        async fetchWeather(dateStr, cb) { try { 
+            // Fix: Override year to 2026 to ensure we get a forecast
+            const parts = dateStr.split('-');
+            const queryDate = `2026-${parts[1]}-${parts[2]}`;
+            const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=35.1815&longitude=136.9066&daily=weathercode,temperature_2m_max&timezone=Asia%2FTokyo&start_date=${queryDate}&end_date=${queryDate}`); const data = await res.json(); const code = data.daily.weathercode[0]; const temp = data.daily.temperature_2m_max[0]; cb(code, `${Math.round(temp)}°C`); } catch(e) { cb(0, '--°C'); } },
         
         renderMemo(items) {
             const list = document.getElementById('list-memo');
